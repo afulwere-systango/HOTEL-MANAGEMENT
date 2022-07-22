@@ -19,15 +19,17 @@ class UserService {
     }
 
     async postUser(request: Request, response: Response) {
-        try {
+        try {            
             const newUserData = new UserSchema(request.body);
-            const newUserEmail = request.body.userEmail;
+            
             const newUserPass = request.body.userPass;
-            const userExist = await UserSchema.findOne({ userEmail: newUserEmail });
+            
+            const userExist = await UserSchema.findOne({ userEmail: newUserData.userEmail });
+            
             if (!userExist) {
-                const hashPass = await bcrypt.hash(newUserPass.toString(), 10);
+                const hashPass = await bcrypt.hash(newUserPass, 10);
                 newUserData.userPass = hashPass;
-                console.log(newUserData);
+                console.log(typeof newUserData);
                 await newUserData.save();
                 return newUserData;
             }
@@ -38,14 +40,15 @@ class UserService {
         }
         catch (err) {
             console.log(err, '(userService.ts)');
+            response.send(err);
         }
     }
 
 
     async userLogin(request: any, response: Response, next: any) {
         let userData = request.session.passport.user;
-        //    console.log(request.session);
-        //    console.log(typeof userData);
+           console.log(request.session);
+           console.log(typeof userData);
         return userData;
 
     }

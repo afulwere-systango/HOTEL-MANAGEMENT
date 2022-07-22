@@ -16,9 +16,11 @@ const initializePass = (passport:any) => {
     }
     passport.use(new LocalStrategy({
         
-        usernameField: 'email',
-        passwordField: 'password',
+        usernameField: 'userEmail',
+        passwordField: 'userPass',
     }, (email: any, password: any, done: any) => {
+        console.log(email,password);
+        
         UserSchema.findOne({ userEmail: email })
             .then((user) => {
                 console.log(validatePassword(password, user));
