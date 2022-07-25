@@ -1,4 +1,4 @@
-import e, { Request, Response } from "express";
+import  { Request, Response } from "express";
 import userService from "../services/userService";
 import passport from "passport";
 import UserSchema from '../models/userModel';
@@ -6,9 +6,9 @@ import UserSchema from '../models/userModel';
 
 
 class UserController {
-    async getUser(request: Request, response: Response) {
+    async getUser(request: Request, response: Response,next:any) {
         try {
-            let userData = await userService.getUser(request, response);
+            let userData = await userService.getUser(request,next);
             response.send(userData);
         } catch (error) {
             console.log("error in get user (userController.js) !");
@@ -16,24 +16,20 @@ class UserController {
         }
     }
 
-    async postUser(request: any, response: Response) {
+    async postUser(request: any, response: Response,next:any) {
         try {
-            // let userData=new UserSchema(request.body);
-            // console.log(request.body);
             
-            // console.log(userData,'111111111111');
-            
-            let userData = await userService.postUser(request, response);
+            let userData = await userService.postUser(request, response,next);
             if(userData==false){
                 response.status(409).json({message:'user already exist.... '})
             }
             else{
             console.log('user added successfully....');
-            response.send('user added successfully...')
+            response.json({msg:'user added successfully...'})
             }
         } catch (error) {
             console.log("error in post user (userController.js) !");
-            response.send(error);
+            response.send('error');
         }
     }
 

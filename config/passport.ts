@@ -35,10 +35,6 @@ const initializePass = (passport:any) => {
                         //   expiresIn: "2h",
                         // }
                       );
-                
-
-
-
                       return done(null, token);
                 }
 

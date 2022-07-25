@@ -3,33 +3,29 @@ import UserSchema from '../models/userModel';
 import bcrypt from "bcrypt";
 
 class UserService {
-    async getUser(request: Request, response: Response) {
+    async getUser(request: Request,next:any) {
+        try{
         let id = request.params.id;
-        // console.log(id);
-        // id='62d79e3427dd663218f519bb';
         const user = await UserSchema.findOne({ _id: id });
-        // console.log(user);
-
-        // user.forEach(element => {
-        //     console.log(element.userEmail);
-        //     console.log(element.userPass);
-
-        // });
         return user;
+        }catch(err){
+            next(err);
+        }
     }
 
-    async postUser(request: Request, response: Response) {
+    async postUser(request: Request, response: Response,next:any) {
         try {            
             const newUserData = new UserSchema(request.body);
-            
             const newUserPass = request.body.userPass;
+            console.log(newUserPass);
+            console.log(newUserData);
             
             const userExist = await UserSchema.findOne({ userEmail: newUserData.userEmail });
             
             if (!userExist) {
                 const hashPass = await bcrypt.hash(newUserPass, 10);
                 newUserData.userPass = hashPass;
-                console.log(typeof newUserData);
+                // console.log(typeof newUserData);
                 await newUserData.save();
                 return newUserData;
             }
@@ -39,18 +35,24 @@ class UserService {
             }
         }
         catch (err) {
-            console.log(err, '(userService.ts)');
-            response.send(err);
+            console.log(err, '(userService.ts 11111111111111111)');
+            // response.send(err);
+            throw  err;
+            // next(err);
+            
         }
     }
 
 
     async userLogin(request: any, response: Response, next: any) {
+        try{
         let userData = request.session.passport.user;
            console.log(request.session);
-           console.log(typeof userData);
+        //    console.log(typeof userData);
         return userData;
-
+        }catch(err){
+            next(err);
+        }
     }
 }
 
