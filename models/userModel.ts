@@ -1,4 +1,8 @@
+import { string } from "joi";
 import mongoose,{Schema,Document } from "mongoose";
+import { ManagerSchemaHotel } from "./managerModel";
+
+
 
 export interface User extends Document {
     firstName:String,
@@ -7,6 +11,9 @@ export interface User extends Document {
     userEmail:String,
     userPass:String
 }
+
+// let myarr = [String,Number]
+
 
 const USER_SCHEMA = new Schema<User>({
     firstName: {
@@ -26,9 +33,15 @@ const USER_SCHEMA = new Schema<User>({
         required: true,      
       },
     userPass: {
+
         type: String,
         required: true,      
-      }
+      },
+    // userArray: {
+    //   type: [
+    //     { type: mongoose.Schema.Types.ObjectId, ref: 'hotel', required: true },
+    //   ],
+    //   }
 },{ collection: 'User' });
 
 export default mongoose.model<User>('UserSchema',USER_SCHEMA);

@@ -7,16 +7,20 @@ import managerRout from "./routes/managerRoute";
 import session from "express-session";
 import passport from 'passport';
 import flash from 'express-flash';
-import initializePass from './config/passport';
-
+// import initializePass from './config/passport';
+import multer from 'multer';
+const multerVar=multer();
 //initialize express 
 const app = express();
 
 //get data from post request and convert into json object(post data pars in json) 
 app.use(bodyParser.json());
 //pars the url encoded data
-app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use(bodyParser.urlencoded({
+    extended: true,
+}));
+app.use(multerVar.array("img"))
+app.use(express.json())
 //process is core module provide end variable access
 const PORT = process.env.PORT;
 //use->it is the middleware
@@ -32,7 +36,8 @@ app.use(session({
 }));
 
 
-initializePass(passport);
+// initializePass(passport);
+require('./config/passport')
 // passport.session() acts as a middleware to alter the req object and change the 'user' value that is currently the session id (from the client cookie) into the true deserialized user object.
 app.use(passport.initialize());
 app.use(passport.session());

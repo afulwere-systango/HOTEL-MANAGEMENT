@@ -1,7 +1,8 @@
 import { Request, Response } from 'express'
 import UserSchema from '../models/userModel';
 import bcrypt from "bcrypt";
-
+import passport from 'passport';
+import {sign} from 'jsonwebtoken'
 class UserService {
     async getUser(request: Request,next:any) {
         try{
@@ -13,45 +14,50 @@ class UserService {
         }
     }
 
-    async postUser(request: Request, response: Response,next:any) {
+    async postUser(request: Request,next:any) {
         try {            
-            const newUserData = new UserSchema(request.body);
-            const newUserPass = request.body.userPass;
-            console.log(newUserPass);
-            console.log(newUserData);
             
+            const newUserData = new UserSchema(request.body);
+            const newUserPass = request.body.userPass;            
             const userExist = await UserSchema.findOne({ userEmail: newUserData.userEmail });
             
             if (!userExist) {
                 const hashPass = await bcrypt.hash(newUserPass, 10);
                 newUserData.userPass = hashPass;
-                // console.log(typeof newUserData);
                 await newUserData.save();
                 return newUserData;
             }
             else {
-                console.log('user already exist (userService.ts)!!!');
                 return false;
             }
         }
         catch (err) {
             console.log(err, '(userService.ts 11111111111111111)');
-            // response.send(err);
-            throw  err;
-            // next(err);
-            
+            throw  err;            
         }
     }
 
 
-    async userLogin(request: any, response: Response, next: any) {
+    async userLogin(request: any, next: any) {
         try{
-        let userData = request.session.passport.user;
-           console.log(request.session);
-        //    console.log(typeof userData);
-        return userData;
+        
+    }
+        catch(err){
+            throw err;
+        }
+    }
+
+    async updateUser(request: any, response: Response) {
+        try{
+            // const newUserData = UserSchema();
+            await UserSchema.updateOne({_id:"62e26a09bcb872226a486a31"},
+            {
+                $push:{userArray:request.body.userArray}
+            })
         }catch(err){
-            next(err);
+            // next(err);
+            console.log(err);
+            
         }
     }
 }

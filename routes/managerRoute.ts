@@ -8,7 +8,10 @@ import verifyUser from "../middleware/auth";
 
 const rout = express.Router();
 
-rout.post('/phase_one',verifyUser,managerController.postPhaseOne);
-rout.post('/phase_two',verifyUser,managerController.postPhaseTwo);
+rout.post('/hotel',verifyUser,managerController.postHotel);
+rout.post('/getimg',managerController.getimg);
+rout.post('/uploadHotelIMG:id',verifyUser,managerController.postUploadHotelIMG);
+rout.post('/rooms:id',verifyUser,managerController.postRooms);
+
 
 export default rout;
