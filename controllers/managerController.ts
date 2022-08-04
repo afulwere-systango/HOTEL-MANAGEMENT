@@ -1,13 +1,15 @@
-import { Request, Response } from "express";
+import { Request, response, Response } from "express";
 import managerService from "../services/managerService";
 import errorFunction from "../utils/errorFunction";
+import passport from "passport";
+
 class ManagerController {
 
-    async postHotel(request: Request, response: Response, next: any) {
+    async createHotel(request: Request, response: Response, next: any) {
         try {
-            const DATA = await managerService.postHotel(request, next);
-            console.log('hotel data insert successfully....');
-            response.json({ msg: 'hotel data insert successfully....' })
+             await managerService.createHotel(request, next);
+            console.log('hotel created successfully....');
+            response.json({ msg: 'hotel created successfully....' })
         } catch (error:any) {
             console.log('error in managerController.ts');
             response.json(
@@ -24,10 +26,10 @@ class ManagerController {
             response.json({ msg: { error } })
         }
     }
-    async postRooms(request: Request, response: Response, next: any) {
+    async createRooms(request: Request, response: Response, next: any) {
 
         try {
-            const DATA: any = await managerService.postRooms(request, next);
+            const DATA: any = await managerService.createRooms(request, next);
             if (DATA) {
 
                 console.log('room inserted successfully ....', DATA);
@@ -46,10 +48,10 @@ class ManagerController {
         }
 
     }
-    async postUploadHotelIMG(request: Request, response: Response) {
+    async uploadIMG(request: Request, response: Response) {
 
         try {
-            const DATA = await managerService.postUploadHotelIMG(request);
+            const DATA = await managerService.uploadIMG(request);
             console.log(DATA);
             if (DATA) {
                 response.json({ msg: 'images added successfully...' })
@@ -61,6 +63,19 @@ class ManagerController {
                 errorFunction(true, `Error in images Data : ${error.message}`, null)
             );
         }
+
+    }
+    async googleLogin(request:any){
+        await passport.authenticate('google', (err:any, user:any) => {
+            if (err) {
+                throw err;
+            }
+            console.log(user);
+            }
+            )(request,response);
+            // response.append('Authorization',token); 
+            // response.json({ message: { user, access_token: token } })
+
 
     }
 }

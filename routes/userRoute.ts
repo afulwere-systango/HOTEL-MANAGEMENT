@@ -1,16 +1,23 @@
 import express from "express";
 import userController from "../controllers/userControllers";
-import passport from "passport";
-import passportLocal from "passport-local";
 import verifyUser from "../middleware/auth";
 import userValidation from "../middleware/userValidation";
-const rout = express.Router();
+import passport from "passport";
+const route = express.Router();
 
 
-rout.post('/insert_user',userValidation,userController.postUser);
-rout.post('/login_user',userController.userLogin);
-rout.get('/get_user:id',verifyUser,userController.getUser);    
-rout.get('/logout_user',userController.userLogout);
-rout.put("/update_user",userController.updateUser)
-export default rout;
+route.post('/create',userValidation,userController.create);
+route.post('/login',userController.login);
+
+route.post('/search/:location?/:rating?',userController.search);
+
+route.get('/get_user:id',verifyUser,userController.getUser);    
+route.get('/logout',userController.logout);
+route.put("/update",userController.update)
+
+route.get('/auth/google', passport.authenticate("google", { scope: ["email", "profile"] }));
+route.get('/auth/google/callback',userController.loginGoogle);
+
+
+export default route;
 

@@ -1,10 +1,11 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, ObjectId } from "mongoose";
 
 export interface ManagerIMG extends Document {
   user_id: String,
   hotel_id:String,
   img: Buffer
 }
+
 
 const MANAGER_SCHEMA_IMG = new Schema<ManagerIMG>({
   user_id: {
@@ -25,7 +26,7 @@ export interface ManagerHotel extends Document {
   user_id: String,
   hotelName: String,
   location: String,
-  // images: String,
+  rating: Number
   // filePath:Buffer
 }
 
@@ -47,16 +48,16 @@ const MANAGER_SCHEMA_HOTEL = new Schema<ManagerHotel>({
     type: String,
     required: true,
   }
-  // ,
-  // images: {
-  //   type: String,
-  //   required: true,
-  // }
+  ,
+  rating: {
+    type: Number,
+    required: true,
+  }
 }, { collection: 'hotel' });
 
 export interface ManagerRooms extends Document {
   user_id: String,
-  hotel_id:String,
+  hotel_id:ObjectId,
   TotalRooms: Number,
   ACRooms: Number,
   NonACRooms: Number,
@@ -70,7 +71,7 @@ const MANAGER_SCHEMA_ROOMS = new Schema<ManagerRooms>({
     require: true,
   },
   hotel_id:{
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     require: true,   
   },
   TotalRooms: {

@@ -7,7 +7,7 @@ export default (db:string)=>{
     useFindAndModify: false,
     useUnifiedTopology: true
   },()=>{
-    console.log('connected to mongoose db')
+    console.log('connected to database....')
   }
 );
 }

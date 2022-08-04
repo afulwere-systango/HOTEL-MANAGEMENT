@@ -9,7 +9,9 @@ export interface User extends Document {
     lastName:String,
     userPhone:Number,
     userEmail:String,
-    userPass:String
+    userPass:String,
+    provider:String,
+    googleID:String
 }
 
 // let myarr = [String,Number]
@@ -26,7 +28,7 @@ const USER_SCHEMA = new Schema<User>({
       },
     userPhone: {
         type:Number,
-        required: true,      
+        // required: true,      
       },
     userEmail: {
         type: String,
@@ -35,8 +37,17 @@ const USER_SCHEMA = new Schema<User>({
     userPass: {
 
         type: String,
+        // required: true,      
+      },
+      provider: {
+        type: String,
         required: true,      
       },
+      googleID: {
+        type: String,
+        // required: true,      
+      }
+
     // userArray: {
     //   type: [
     //     { type: mongoose.Schema.Types.ObjectId, ref: 'hotel', required: true },

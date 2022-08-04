@@ -7,7 +7,7 @@ import managerRout from "./routes/managerRoute";
 import session from "express-session";
 import passport from 'passport';
 import flash from 'express-flash';
-// import initializePass from './config/passport';
+import Intialize from './config/passport';
 import multer from 'multer';
 const multerVar=multer();
 //initialize express 
@@ -36,16 +36,16 @@ app.use(session({
 }));
 
 
-// initializePass(passport);
+Intialize(passport);
 require('./config/passport')
 // passport.session() acts as a middleware to alter the req object and change the 'user' value that is currently the session id (from the client cookie) into the true deserialized user object.
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(flash());
+// app.use(flash());
 connect(`${process.env.DB_URL}`);
 app.use('/user', userRout);
-app.use('/manager/create_hotel_service', managerRout);
+app.use('/manager', managerRout);
 
 
 app.listen(PORT, () => {

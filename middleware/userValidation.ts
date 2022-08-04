@@ -3,7 +3,7 @@ import validation from "../config/validation"
 import errorFunction  from "../utils/errorFunction";
 
 const userValidation = async (request:Request, response:Response, next:any) => {
-    console.log(typeof request.body.userPhone);
+    // console.log(typeof request.body.userPhone);
     
 	const payload = {
 		firstName: request.body.firstName,

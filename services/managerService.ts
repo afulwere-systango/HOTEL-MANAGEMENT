@@ -4,15 +4,21 @@ request.defaults({ encoding: null })
 // .defaults({ encoding: null });
 import fs from "fs";
 import jwt from "jsonwebtoken";
+import {ObjectID} from 'mongodb';
+
 import { ManagerSchemaHotel, ManagerSchemaRooms, ManagerSchemaIMG } from '../models/managerModel';
 
 class ManagerService {
 
-    async postHotel(request: any, next: any) {
+    async createHotel(request: any, next: any) {
         try {
             // fs.createWriteStream('./text.jpeg').write(img);
-            const incrUserID: any = request.session.passport.user;
-            const decoded: any = jwt.verify(incrUserID, `${process.env.TOKEN_KEY}`);
+            const bearerData = request.headers['authorization'];
+            const bearer=bearerData.split(' ');
+            const token =bearer[1]
+
+            const decoded: any = jwt.verify(token, `${process.env.TOKEN_KEY}`);
+            // console.log(decoded,'2222222222222222222');
             const userID = decoded.user_id;
             request.body.user_id = userID;
             let reqData = new ManagerSchemaHotel(request.body);
@@ -23,30 +29,25 @@ class ManagerService {
         }
     }
 
-    async postRooms(request: any, next: any) {
+    async createRooms(request: any, next: any) {
         try {
             const hotel_id = request.params.id;
-            // console.log(request.session.passport,'11111111111111');
-            const encryptedUserID: any = request.session.passport.user;
-            console.log(encryptedUserID);
+            const bearerData = request.headers['authorization'];
+            const bearer=bearerData.split(' ');
+            const token =bearer[1]
 
-            const decoded: any = jwt.verify(encryptedUserID, `${process.env.TOKEN_KEY}`);
+            const decoded: any = jwt.verify(token, `${process.env.TOKEN_KEY}`);
             const userID = decoded.user_id;
-
-            console.log(userID, '2222222222222222222222');
             request.body.user_id = userID;
             const hotelData: any = await ManagerSchemaHotel.findOne({ _id: hotel_id });
-
-            console.log(hotelData, '333333333333333333');
             if (hotelData) {
                 const hotelIDExist: any = await ManagerSchemaRooms.findOne({ hotel_id: hotel_id })
                 if (hotelIDExist) {
                     return false;
                 }
-                request.body.hotel_id = hotelData._id;
-                // console.log(request.body,'222222222222222'); 
-
-
+                request.body.hotel_id = new ObjectID(hotelData._id);
+                console.log(typeof request.body.hotel_id,'0000000000000000000000');
+                // console.log(typeof request.body._id,'0000000000000000000000');
                 let reqData = new ManagerSchemaRooms(request.body);
                 await reqData.save();
                 return reqData;
@@ -59,8 +60,6 @@ class ManagerService {
             throw err;
         }
     }
-
-
 
     async getimg(request: Request, next: any) {
         const file: any = await ManagerSchemaHotel.findOne({ _id: "62e0ce1975d8fb14afa68e4e" });
@@ -77,12 +76,7 @@ class ManagerService {
         return "filedata";
     }
 
-
-
-
-
-
-    async postUploadHotelIMG(request: any) {
+    async uploadIMG(request: any) {
 
         try {
 
@@ -125,7 +119,3 @@ class ManagerService {
 }
 let managerService = new ManagerService();
 export default managerService;
-
-
-// "userEmail":"chetan@1234",
-// "userPass":"1234"
