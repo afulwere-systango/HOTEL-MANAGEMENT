@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import userService from "../services/userService";
 import passport from "passport";
-import UserSchema from '../models/userModel';
+import {UserSchema} from '../models/userModel';
 import jwt from "jsonwebtoken";
 
 
@@ -106,13 +106,37 @@ class UserController {
                 if (err) {
                     throw err;
                 }
-                // response.append('Authorization', token);
+                response.append('Authorization', user);
                 response.json({ message: { user } })
             })(request, response);
         } catch (err) {
             console.log(err);
+            response.json({ message: { err } })
         }
     }
+    async roomBooking(request:any,response:any){
+
+        try {
+            const DATA = await userService.roomBooking(request);
+            if(typeof  DATA==='string'){
+            response.json({ message: DATA })
+            }else{
+            response.json({ message: {'congrats ! your room book successfully!!! rooms price :': DATA.roomsPrice} })
+            }
+        } catch (error) {
+            response.json({ message: { error } })
+        }
+    }
+    async checkOut(request:any,response:any){
+        try {
+            const DATA=await userService.checkOut(request);
+            response.json({ message: DATA })
+        } catch (error) {
+            response.json({ message: error })
+            
+        }
+    }
+
 }
 
 let userController = new UserController();

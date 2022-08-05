@@ -48,15 +48,17 @@ class ManagerController {
         }
 
     }
-    async uploadIMG(request: Request, response: Response) {
+    async uploadLogoImage(request: Request, response: Response) {
 
         try {
-            const DATA = await managerService.uploadIMG(request);
-            console.log(DATA);
-            if (DATA) {
-                response.json({ msg: 'images added successfully...' })
+            console.log(2222);
+            
+            const DATA = await managerService.uploadLogoImage(request);
+            // console.log(DATA);
+            if (typeof DATA==='string') {
+                response.json({ msg:  DATA})
             } else {
-                response.json({ msg: 'first fill hotel details...' })
+                response.json({ msg: 'images added successfully....' })
             }
         } catch (error: any) {
             response.json(
@@ -65,6 +67,30 @@ class ManagerController {
         }
 
     }
+    
+    
+    async uploadImages(request: Request, response: Response) {
+
+        try {
+            console.log(2222);
+            
+            const DATA = await managerService.uploadImages(request);
+            // console.log(DATA);
+            
+                response.json({ msg: DATA })
+            
+        } catch (error: any) {
+            
+            response.json(
+                errorFunction(true, `Error in images Data : ${error.message}`, null)
+            );
+        }
+
+    }
+
+
+
+
     async googleLogin(request:any){
         await passport.authenticate('google', (err:any, user:any) => {
             if (err) {

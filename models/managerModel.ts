@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, ObjectId } from "mongoose";
 export interface ManagerIMG extends Document {
   user_id: String,
   hotel_id:String,
-  img: Buffer
+  loboImg: Buffer
 }
 
 
@@ -16,10 +16,19 @@ const MANAGER_SCHEMA_IMG = new Schema<ManagerIMG>({
     type: String,
     require: true,
   },
-  img: {
+  loboImg: {
     type: Buffer,
-    require: true,
-  }
+    // require: true,
+  },
+  Images: {
+      type: [
+        { type:Buffer
+          //  mongoose.Schema.Types.ObjectId, ref: 'hotel'
+        // , required: true 
+      },
+      ],
+      }
+
 }, { collection: 'hotel-images' });
 
 export interface ManagerHotel extends Document {
@@ -36,6 +45,7 @@ const MANAGER_SCHEMA_HOTEL = new Schema<ManagerHotel>({
   //   require: true,
   // }
   // ,
+
   user_id: {
     type: String,
     require: true,

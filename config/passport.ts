@@ -1,6 +1,6 @@
 import passport from "passport";
 import passportLocal from "passport-local";
-import UserSchema from '../models/userModel';
+import {UserSchema} from '../models/userModel';
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 // const GoogleStrategy = require("passport-google-oauth2").Strategy;
