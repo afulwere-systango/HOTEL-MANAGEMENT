@@ -1,55 +1,34 @@
 import { Request, Response } from 'express'
-import { UserSchema, roomBookingSchema } from '../models/userModel';
+import { USERS, roomBookingSchema } from '../models/userModel';
 import { ManagerSchemaHotel, ManagerSchemaRooms, ManagerSchemaIMG } from '../models/managerModel';
 import bcrypt from "bcrypt";
-import { getUserID } from "../middleware/auth";
-
-import passport from 'passport';
-import { sign } from 'jsonwebtoken'
 class UserService {
-    async getUser(request: Request, next: any) {
-        try {
-            let id = request.params.id;
-            const user = await UserSchema.findOne({ _id: id });
-            return user;
-        } catch (err) {
-            next(err);
-        }
-    }
 
-    async create(request: Request, next: any) {
+    async create(request: Request) {
         try {
 
             request.body.provider = 'local'
-            const newUserData = new UserSchema(request.body);
+            const newUserData = new USERS(request.body);
             const newUserPass = request.body.userPass;
-            const userExist = await UserSchema.findOne({ userEmail: newUserData.userEmail });
-
-            if (!userExist) {
-                const hashPass = await bcrypt.hash(newUserPass, 10);
-                newUserData.userPass = hashPass;
-                await newUserData.save();
-                return newUserData;
+            const userExist = await USERS.findOne({ userEmail: newUserData.userEmail });
+            if (userExist) {
+                return 'USER ALREADY EXIST.';
             }
-            else {
-                return false;
-            }
+            const hashPass = await bcrypt.hash(newUserPass, 10);
+            newUserData.userPass = hashPass;
+            await newUserData.save();
+            return newUserData;
         }
         catch (err) {
-            console.log(err, '(userService.ts 11111111111111111)');
+            console.log(err, '(userService.ts)');
             throw err;
         }
     }
-
-
-    async login(request: any) {
+    async search(request: any) {
         try {
-            console.log(request.query.location);
-            console.log(request.query.rating);
             const paramLocation = request.query.location;
             const paramRating = +request.query.rating;
             return ManagerSchemaHotel.aggregate([
-
                 {
                     $match: {
                         $text: { $search: paramLocation || "indore", $diacriticSensitive: true }, rating: paramRating || { $lte: 5 }
@@ -78,11 +57,61 @@ class UserService {
             throw err;
         }
     }
+    async getUser(request: Request) {
+        try {
+            let userData: any = request.user;
+            return userData;
+            console.log('user details successfully get.');
+        } catch (err) {
+            throw err
+        }
+    }
+    async getHotelDetails(request: any) {
+        try {
+            const hotelId = request.params.hotelId;
 
+            const hotelData: any = await ManagerSchemaHotel.findOne({ _id: hotelId })
+            const roomData: any = await ManagerSchemaRooms.findOne({ hotel_id: hotelId })
+            const imageData: any = await ManagerSchemaIMG.findOne({ hotel_id: hotelId })
+            // console.log(imageData);
+
+            const ALL_DATA: any = { hotelData, roomData, imageData };
+            // const { hotelName, location, rating }:any = hotelData;
+            // const { TotalRooms, ACRooms, NonACRooms, ACRoomPrice, NonACRoomPrice } = roomData;
+            // const  {loboImg,Images} :any  = imageData;
+            // console.log(loboImg,Images);
+
+            // DATA = {
+            //     "hotel name ": hotelName,
+            //     "location": location,
+            //     "Rating": rating,
+            //     "Total Rooms": TotalRooms,
+            //     "AC Rooms": ACRooms,
+            //     "Non AC Rooms": NonACRooms,
+            //     "AC Room Price": ACRoomPrice,
+            //     "Non Ac Room Price": NonACRoomPrice,
+            //     "lobo image":loboImg
+            //     // loboImg, Images
+            // }
+
+            return ALL_DATA;
+
+
+            // // console.log(hotelData);
+            // // console.log(roomData);
+            // // console.log(imageData);
+            // const data :any=[...hotelData];
+
+
+
+        } catch (err) {
+            throw err
+        }
+    }
     async update(request: any, response: Response) {
         try {
             // const newUserData = UserSchema();
-            await UserSchema.updateOne({ _id: "62e26a09bcb872226a486a31" },
+            await USERS.updateOne({ _id: "62e26a09bcb872226a486a31" },
                 {
                     $push: { userArray: request.body.userArray }
                 })
@@ -96,80 +125,80 @@ class UserService {
     async roomBooking(request: any) {
         try {
 
-            // console.log(request.params.hotelId);
             const hotelId = request.params.hotelId;
-            const bearerData = request.headers['authorization'];
-            const userId = await getUserID(bearerData)
-            request.body.userId = userId;
-            console.log(request.body.CheckInDate);
-
+            const userData = request.user
             const fromDate = new Date(request.body.fromDate)
             const toDate = new Date(request.body.toDate)
             const CurrentDate = new Date();
-            
-            console.log(toDate.getDate()-fromDate.getDate()+1);
-            // console.log(CheckOutDate);
-            // console.log(CurrentDate);
-            
-            request.body.CheckInDate=fromDate;
-            request.body.CheckOutDate=toDate;
-            request.body.CurrentDate=CurrentDate;
-            request.body.hotelId=hotelId;
 
+            request.body.userId = userData._id;
+            request.body.CheckInDate = fromDate;
+            request.body.CheckOutDate = toDate;
+            request.body.CurrentDate = CurrentDate;
+            request.body.hotelId = hotelId;
 
-            const roomsData = await ManagerSchemaRooms.findOne({ hotel_id: hotelId })
-            // console.log(roomsData);
-            if (roomsData) {
-                let AcRoomPrice = Number(roomsData.ACRoomPrice) * Number(request.body.AcRooms);
-                let NonAcRoomPrice = Number(roomsData.NonACRoomPrice) * Number(request.body.NonAcRooms);
-                // console.log(AC_ROOM_PRICE);
-                // console.log(NON_AC_ROOM_PRICE);
-                let roomsPrice = AcRoomPrice + NonAcRoomPrice;
-                request.body.roomsPrice = roomsPrice;
-                const newUserData = new roomBookingSchema(request.body);
-                newUserData.save()
-            if(Number(roomsData.ACRooms)>0 && Number(roomsData.NonACRooms)>0 ){
-                let availableAcRooms = Number(roomsData.ACRooms) - Number(request.body.AcRooms)
-                let availableNonAcRooms = Number(roomsData.NonACRooms) - Number(request.body.NonAcRooms)
-                console.log(availableAcRooms);
-                console.log(availableNonAcRooms);
+            // console.log(toDate.getDate() - fromDate.getDate() + 1);
 
+            const hotelRoomsData = await ManagerSchemaRooms.findOne({ hotel_id: hotelId })
+            if (!hotelRoomsData) {
+                return 'hotel not found..'
+            }
+            let AcRoomPrice = Number(hotelRoomsData.ACRoomPrice) * Number(request.body.AcRooms);
+            let NonAcRoomPrice = Number(hotelRoomsData.NonACRoomPrice) * Number(request.body.NonAcRooms);
+            let roomsPrice = AcRoomPrice + NonAcRoomPrice;
+            request.body.roomsPrice = roomsPrice;
+            const newUserData = new roomBookingSchema(request.body);
+            newUserData.save()
+            if (Number(hotelRoomsData.ACRooms) > 0 && Number(hotelRoomsData.NonACRooms) > 0) {
+                let availableAcRooms = Number(hotelRoomsData.ACRooms) - Number(request.body.AcRooms)
+                let availableNonAcRooms = Number(hotelRoomsData.NonACRooms) - Number(request.body.NonAcRooms)
                 await ManagerSchemaRooms.updateOne({ hotel_id: hotelId },
                     {
-                         $set: {
-                            ACRooms : availableAcRooms,
-                            NonACRooms:availableNonAcRooms
+                        $set: {
+                            ACRooms: availableAcRooms,
+                            NonACRooms: availableNonAcRooms
                         }
-                }
+                    }
                 )
-
                 return newUserData;
             }
-               return 'rooms are not available right now...' 
-            }
-            return 'rooms not available....'
-
+            return 'rooms are not available right now...'
         } catch (error) {
             throw error;
         }
     }
-    async checkOut(request:any){
+    async checkOut(request: any) {
 
-        try{
-        console.log(request.query.userId);
-        const userId=request.query.userId
-        const checkOutDate=new Date();
-        console.log(checkOutDate);
-        console.log(userId);
-        
-        await roomBookingSchema.updateOne({ _id: userId },
-                {
-                    $set:{ checkOutDate: checkOutDate }
-                    
-                })
-        return 'checkout';
-            }
-        catch(err){
+        try {
+
+            const userRoomId = request.query.userRoomId
+            const checkOutDate = new Date(request.body.checkOutDate);
+
+            return new Promise(async (resolve: any, reject: any) => {
+
+                await roomBookingSchema.updateOne({ _id: userRoomId },
+                    {
+                        $set: { checkOutDate: checkOutDate }
+
+                    }).then(() => {
+                        resolve('checkout success')
+                    }).catch((err) => {
+                        reject('checkout fail')
+                    })
+            })
+            // await roomBookingSchema.updateOne({ _id: userRoomId },
+            //     {
+            //         $set: { checkOutDate: checkOutDate }
+
+            //     }).then(()=>{
+            //         return 'checkout success'
+            //     })
+            // console.log(data.n);
+            // if (!data.n) {
+            //     return 'booking room not found'
+            // }
+        }
+        catch (err) {
             throw err;
         }
     }

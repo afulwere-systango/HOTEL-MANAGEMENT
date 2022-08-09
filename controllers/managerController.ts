@@ -7,9 +7,9 @@ class ManagerController {
 
     async createHotel(request: Request, response: Response, next: any) {
         try {
-             await managerService.createHotel(request, next);
-            console.log('hotel created successfully....');
-            response.json({ msg: 'hotel created successfully....' })
+            await managerService.createHotel(request, next);
+            console.log('hotel created successfully.');
+            response.json({ msg: 'hotel created successfully.' })
         } catch (error:any) {
             console.log('error in managerController.ts');
             response.json(
@@ -18,6 +18,7 @@ class ManagerController {
         }
 
     }
+
     async getimg(request: Request, response: Response, next: any) {
         try {
             const data = await managerService.getimg(request, next);
@@ -30,13 +31,10 @@ class ManagerController {
 
         try {
             const DATA: any = await managerService.createRooms(request, next);
-            if (DATA) {
-
-                console.log('room inserted successfully ....', DATA);
-                response.json({ msg: 'room inserted successfully...' })
-            }
-            else {
-                response.json({ msg: 'first fill hotel details.../your hotel rooms already exist you can update it now.....' })
+            if (typeof DATA==='string') {
+              response.json({ msg: DATA })
+            }else{
+            response.json({ msg: 'room inserted successfully...' })
             }
         } catch (error: any) {
             // console.log(error,'line 35');
@@ -49,12 +47,8 @@ class ManagerController {
 
     }
     async uploadLogoImage(request: Request, response: Response) {
-
         try {
-            console.log(2222);
-            
             const DATA = await managerService.uploadLogoImage(request);
-            // console.log(DATA);
             if (typeof DATA==='string') {
                 response.json({ msg:  DATA})
             } else {

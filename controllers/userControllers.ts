@@ -1,48 +1,38 @@
 import { Request, Response } from "express";
 import userService from "../services/userService";
 import passport from "passport";
-import {UserSchema} from '../models/userModel';
+import errorFunction  from "../utils/errorFunction";
+import ResponseStatus from "../constants/ResponseStatus";
+import {USERS} from '../models/userModel';
 import jwt from "jsonwebtoken";
 
-
-
 class UserController {
-    async getUser(request: Request, response: Response, next: any) {
-        try {
-            let userData = await userService.getUser(request, next);
-            response.send(userData);
-        } catch (error) {
-            console.log("error in get user (userController.js) !");
-            response.send(error);
-        }
-    }
-    async create(request: any, response: Response, next: any) {
+   
+
+    async create(request: Request, response: Response) {
         try {
 
-            let userData: any = await userService.create(request, next);
-            if (userData) {
+            const DATA : any = await userService.create(request);
+            if (typeof DATA==='string' ) {
+                response.status(409).json({ message: DATA })
+            }else {
                 console.log('user added successfully....');
-                response.json({ msg: 'user added successfully...' })
-            }
-            else {
-                response.status(409).json({ message: 'user already exist.... ' })
-            }
+                response.json({ msg: 'USER CREATED SUCCESSFULLY !' })
 
-        } catch (error) {
+            }
+        } catch (error:any) {
             console.log("error in post user (userController.js) !");
-            response.send('error');
+		    response.status(406).json(errorFunction(true, `Error : ${error.message}`,null));        
         }
     }
-    async login(request: any, response: Response, next: any) {
+
+    async login(request: Request, response: Response, next: any) {
         try {
-            // console.log(request.body)
-            // console.log('1111');
             let token: any;
-            await passport.authenticate('local', (err, user) => {
-                if (err) {
-                    throw err;
+            await passport.authenticate('local', (error, user) => {
+                if (error) {
+                    response.status(406).json(errorFunction(true, `Error : ${error.message}`,null));                            
                 }
-                console.log(user._id);
                 token = jwt.sign(
                     { user_id: user._id },
                     `${process.env.TOKEN_KEY}`
@@ -50,47 +40,72 @@ class UserController {
                     //   expiresIn: "2h",
                     // }
                 );
+
+                if(typeof user==='string'){
+                response.json({ message: user })
+                }else{
                 response.append('Authorization', token);
-                response.json({ message: { user, access_token: token } })
+                response.json({ message: "LOGGED IN." })
+                console.log('user logged in.');
+                
+                }
             }
             )(request, response, next)
-        } catch (error) {
-            response.json({ message: error })
+        } catch (error:any) {
+            response.status(406).json(errorFunction(true, `Error : ${error.message}`,null));                            
         }
     }
-    async search(request: any, response: any) {
-
-
-
+   
+   
+    async getUser(request: Request, response: Response, next: any) {
         try {
-        
-            
-            const HOTEL_DATA = await userService.login(request);
-            if(HOTEL_DATA.length){
-            response.json({ message: HOTEL_DATA })
+            const USER_DATA = await userService.getUser(request);
+            if(typeof USER_DATA==='string'){
+                response.json({ message: USER_DATA })
             }else{
-            response.json({ message: 'hotel not found' })
+                response.json({DATA:USER_DATA});
+            }
+        }
+         catch (error:any) {
+            console.log(error,"error in get user (userController.js) !");
+            response.status(406).json(errorFunction(true, `Something want wring !!! `,null));                            
+
+        }
+    }
+   
+    async getHotelDetails(request: Request, response: Response, next: any) {
+        try {
+            const HOTEL_DATA = await userService.getHotelDetails(request);
+            if(typeof HOTEL_DATA==='string'){
+                response.json({ message: HOTEL_DATA })
+            }else{
+            response.json({DATA:HOTEL_DATA});
+            }
+        }
+         catch (error:any) {
+            console.log("error in get hotel (userController.js) !");
+            response.status(406).json(errorFunction(true, `Something want wring !!! `,null));                            
+
+        }
+    }
+   
+    async search(request: any, response: any) {
+        try {
+            const HOTEL_DATA = await userService.search(request);
+            if(HOTEL_DATA.length){
+            response.status(ResponseStatus.STATUS_SUCCESS).json({ DATA: HOTEL_DATA })
+            }else{
+            response.status(ResponseStatus.STATUS_NOT_FOUND).json({ message: "Hotel not found." })
             }
         } catch (error) {
-            console.log(error);
-            response.json({message:error})
+            console.log(error,"error in get hotel (userController.js) !");
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, `Something want wring !!! `,null));                            
         }
 
 
     }
 
 
-    async logout(request: any, response: any) {
-        // let data=request.session;
-        // console.log(data);
-        request.session.destroy((err: Error) => {
-            if (!err) {
-                response.json({ msg: 'logout success.....' })
-            } else {
-                response.json({ msg: err })
-            }
-        })
-    }
     async update(request: any, response: any) {
         try {
             await userService.update(request, response)
@@ -107,6 +122,9 @@ class UserController {
                     throw err;
                 }
                 response.append('Authorization', user);
+                response.append('Aaaaaaaaaaaaaaaaaaaaaaaaaaaa', "demo");
+                console.log('aapend');
+                
                 response.json({ message: { user } })
             })(request, response);
         } catch (err) {
@@ -129,13 +147,27 @@ class UserController {
     }
     async checkOut(request:any,response:any){
         try {
-            const DATA=await userService.checkOut(request);
+            const DATA:any=await userService.checkOut(request);
+            // DATA.catch((msg:any)=>{
+            //     console.log(msg);
+                
+            // })
             response.json({ message: DATA })
         } catch (error) {
-            response.json({ message: error })
+            response.json({ message: "something wrong" })
             
         }
     }
+    async logout(request: any, response: any) {
+        request.session.destroy((err: Error) => {
+            if (!err) {
+                response.json({ msg: 'logout success.....' })
+            } else {
+                response.json({ msg: err })
+            }
+        })
+    }
+  
 
 }
 

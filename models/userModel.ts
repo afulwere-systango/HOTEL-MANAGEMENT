@@ -13,11 +13,7 @@ export interface User extends Document {
     provider:String,
     googleID:String
 }
-
-// let myarr = [String,Number]
-
-
-const USER_SCHEMA = new Schema<User>({
+const USER = new Schema<User>({
     firstName: {
       type: String,
       required: true,      
@@ -28,16 +24,13 @@ const USER_SCHEMA = new Schema<User>({
       },
     userPhone: {
         type:Number,
-        // required: true,      
       },
     userEmail: {
         type: String,
         required: true,      
       },
     userPass: {
-
         type: String,
-        // required: true,      
       },
       provider: {
         type: String,
@@ -45,14 +38,7 @@ const USER_SCHEMA = new Schema<User>({
       },
       googleID: {
         type: String,
-        // required: true,      
       }
-
-    // userArray: {
-    //   type: [
-    //     { type: mongoose.Schema.Types.ObjectId, ref: 'hotel', required: true },
-    //   ],
-    //   }
 },{ collection: 'User' });
 
 
@@ -123,7 +109,7 @@ const ROOM_BOOK_SCHEMA = new Schema<RoomBook>({
 },{ collection: 'room-booking' });
 
 
-const UserSchema = mongoose.model<User>('UserSchema',USER_SCHEMA);
+const USERS = mongoose.model<User>('User',USER);
 const roomBookingSchema = mongoose.model<RoomBook>('RoomBook',ROOM_BOOK_SCHEMA);
 
-export {UserSchema,roomBookingSchema};
+export {USERS,roomBookingSchema};

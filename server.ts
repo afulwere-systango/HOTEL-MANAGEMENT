@@ -6,9 +6,10 @@ import userRout from "./routes/userRoute";
 import managerRout from "./routes/managerRoute";
 import session from "express-session";
 import passport from 'passport';
-import flash from 'express-flash';
-import Intialize from './config/passport';
+import passportInitialize from './config/passport';
 import multer from 'multer';
+
+
 const multerVar=multer();
 //initialize express 
 const app = express();
@@ -30,26 +31,24 @@ app.use(session({
     //resave false:It will not rewrite the req.session.cookie object. the initial req.session.cookie remains as it is.
     resave: false,
     //When an empty session object is created and no properties are set, it is the uninitialized state. So, setting saveUninitialized to false will not save the session if it is not modified.
-
     saveUninitialized: true,
     secret: `${process.env.SESSION_SECRET}`,
 }));
 
 
-Intialize(passport);
+passportInitialize(passport);
 require('./config/passport')
 // passport.session() acts as a middleware to alter the req object and change the 'user' value that is currently the session id (from the client cookie) into the true deserialized user object.
 app.use(passport.initialize());
 app.use(passport.session());
 
-// app.use(flash());
 connect(`${process.env.DB_URL}`);
 app.use('/user', userRout);
 app.use('/manager', managerRout);
 
 
 app.listen(PORT, () => {
-    console.log(`server start at port ${PORT}`);
+    console.log(`server listen at port ${PORT}`);
 })
 
 
