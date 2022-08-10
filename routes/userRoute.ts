@@ -20,9 +20,9 @@ route.get('/get-hotel-details/:hotelId',verifyUser,userController.getHotelDetail
 //searching  hotels [optional location and rating] without login  
 route.get('/search',userController.search);
 //booking hotel hotel id
-route.post('/booking-room/:hotelId',verifyUser,userController.roomBooking);
+route.post('/booking-room/:hotelId',validation.bookingValidation,verifyUser,userController.booking);
 //checkout hotel 
-route.post('/check-out',verifyUser,userController.checkOut);
+route.post('/check-out/:roomId',validation.checkoutValidation,verifyUser,userController.checkOut);
 
 route.put("/update",userController.update)
 //logout user

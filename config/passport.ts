@@ -2,7 +2,6 @@ import passport from "passport";
 import passportLocal from "passport-local";
 import {USERS} from '../models/userModel';
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import passportGoogle from "passport-google-oauth2";
 
 
@@ -68,11 +67,11 @@ function passportInitialize(passport: any) {
             console.log('Creating new user...');
             // console.log(profile);
             request.body={
-                firstName:profile.family_name,
-                lastName:profile.given_name,
-                userEmail:profile.emails[0].value,
-                googleID:profile.id,
-                provider:"google"
+                FirstName:profile.family_name,
+                LastName:profile.given_name,
+                Email:profile.emails[0].value,
+                GoogleID:profile.id,
+                Provider:"google"
             }
             let reqData = new USERS(request.body);
             reqData.save();

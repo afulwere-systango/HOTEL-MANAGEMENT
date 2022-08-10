@@ -6,7 +6,7 @@ import fs from "fs";
 import jwt from "jsonwebtoken";
 import { ObjectID } from 'mongodb';
 
-import { ManagerSchemaHotel, ManagerSchemaRooms, ManagerSchemaIMG } from '../models/managerModel';
+import { HOTEL, HOTEL_ROOM, HOTEL_IMAGE } from '../models/managerModel';
 
 class ManagerService {
 
@@ -15,7 +15,7 @@ class ManagerService {
             // fs.createWriteStream('./text.jpeg').write(img);
             const userData: any = request.user;
             request.body.user_id = userData._id;
-            let hotelData = new ManagerSchemaHotel(request.body);
+            let hotelData = new HOTEL(request.body);
             await hotelData.save();
             return hotelData;
         } catch (err) {
@@ -28,16 +28,16 @@ class ManagerService {
             const hotelId = request.params.id;
             const userData: any = request.user;
             request.body.user_id = userData._id;
-            const hotelData: any = await ManagerSchemaHotel.findOne({ _id: hotelId });
+            const hotelData: any = await HOTEL.findOne({ _id: hotelId });
             if (!hotelData) {
                 return 'hotel data not found'
             }
-            const hotelIDExist: any = await ManagerSchemaRooms.findOne({ hotel_id: hotelId })
+            const hotelIDExist: any = await HOTEL_ROOM.findOne({ hotel_id: hotelId })
             if (hotelIDExist) {
                 return 'room already inserted';
             }
             request.body.hotel_id = new ObjectID(hotelData._id);
-            let reqData = new ManagerSchemaRooms(request.body);
+            let reqData = new HOTEL_ROOM(request.body);
             await reqData.save();
             return reqData;
         }
@@ -48,7 +48,7 @@ class ManagerService {
     }
 
     async getimg(request: Request, next: any) {
-        const file: any = await ManagerSchemaHotel.findOne({ _id: "62e0ce1975d8fb14afa68e4e" });
+        const file: any = await HOTEL.findOne({ _id: "62e0ce1975d8fb14afa68e4e" });
         console.log(file.filePath);
         fs.writeFileSync("./text.jpeg", file.filePath);
         //     request.get(file.filePath, function (err:any) {
@@ -71,18 +71,18 @@ class ManagerService {
             const userData = request.user;
 
             request.body.user_id = userData._id;
-            const hotelData: any = await ManagerSchemaHotel.findOne({ _id: hotelId });
+            const hotelData: any = await HOTEL.findOne({ _id: hotelId });
             if (!hotelData) {
                 return 'first fill hotel details.....'
             }
             request.body.hotel_id = hotelId;
             let reqData;
-            const ImgData = await ManagerSchemaIMG.findOne({ hotel_id: hotelId })
+            const ImgData = await HOTEL_IMAGE.findOne({ hotel_id: hotelId })
             if (ImgData?.loboImg) {
                 return 'logo uploaded already .....';
             }
             request.body.loboImg = img[0].buffer;
-            reqData = new ManagerSchemaIMG(request.body);
+            reqData = new HOTEL_IMAGE(request.body);
             await reqData.save();
             return reqData;
         }
@@ -105,14 +105,14 @@ class ManagerService {
         const userID = decoded.user_id;
         request.body.user_id = userID;
 
-        const hotelData: any = await ManagerSchemaHotel.findOne({ _id: hotel_id });
+        const hotelData: any = await HOTEL.findOne({ _id: hotel_id });
         if (hotelData) {
 
             // console.log(img);
             let imagesArray: any = [];
             img.forEach(async (element: any) => {
                 imagesArray.push(element.buffer)
-                //     await ManagerSchemaIMG.updateOne({ hotel_id: hotel_id },
+                //     await HOTEL_IMAGE.updateOne({ hotel_id: hotel_id },
                 //         {
                 //             $push : {
                 //                 Images:element.buffer
@@ -121,7 +121,7 @@ class ManagerService {
             })
             // console.log(imagesArray);
 
-            await ManagerSchemaIMG.updateOne({ hotel_id: hotel_id },
+            await HOTEL_IMAGE.updateOne({ hotel_id: hotel_id },
                 {
 
                     $push: {

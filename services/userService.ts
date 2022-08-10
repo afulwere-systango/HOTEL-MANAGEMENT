@@ -1,34 +1,37 @@
 import { Request, Response } from 'express'
-import { USERS, roomBookingSchema } from '../models/userModel';
-import { ManagerSchemaHotel, ManagerSchemaRooms, ManagerSchemaIMG } from '../models/managerModel';
+import { USERS, BOOKING } from '../models/userModel';
+import { HOTEL, HOTEL_ROOM, HOTEL_IMAGE } from '../models/managerModel';
 import bcrypt from "bcrypt";
+import TextResponse from "../constants/TextResponse";
+
 class UserService {
 
     async create(request: Request) {
         try {
 
-            request.body.provider = 'local'
-            const newUserData = new USERS(request.body);
-            const newUserPass = request.body.userPass;
-            const userExist = await USERS.findOne({ userEmail: newUserData.userEmail });
+            request.body.Provider = 'local'
+            const newUser = new USERS(request.body);
+            const newPassword:any= request.body.Password;
+            const userExist = await USERS.findOne({ Email: newUser.Email });
             if (userExist) {
-                return 'USER ALREADY EXIST.';
+                return TextResponse.USER_ALREADY_EXIST;
             }
-            const hashPass = await bcrypt.hash(newUserPass, 10);
-            newUserData.userPass = hashPass;
-            await newUserData.save();
-            return newUserData;
+            const hashPass = await bcrypt.hash(newPassword, 10);
+            newUser.Password = hashPass;
+            await newUser.save();
+            return newUser;
         }
         catch (err) {
             console.log(err, '(userService.ts)');
             throw err;
+
         }
     }
     async search(request: any) {
         try {
             const paramLocation = request.query.location;
             const paramRating = +request.query.rating;
-            return ManagerSchemaHotel.aggregate([
+            return HOTEL.aggregate([
                 {
                     $match: {
                         $text: { $search: paramLocation || "indore", $diacriticSensitive: true }, rating: paramRating || { $lte: 5 }
@@ -70,9 +73,9 @@ class UserService {
         try {
             const hotelId = request.params.hotelId;
 
-            const hotelData: any = await ManagerSchemaHotel.findOne({ _id: hotelId })
-            const roomData: any = await ManagerSchemaRooms.findOne({ hotel_id: hotelId })
-            const imageData: any = await ManagerSchemaIMG.findOne({ hotel_id: hotelId })
+            const hotelData: any = await HOTEL.findOne({ _id: hotelId })
+            const roomData: any = await HOTEL_ROOM.findOne({ hotel_id: hotelId })
+            const imageData: any = await HOTEL_IMAGE.findOne({ hotel_id: hotelId })
             // console.log(imageData);
 
             const ALL_DATA: any = { hotelData, roomData, imageData };
@@ -122,37 +125,38 @@ class UserService {
 
         }
     }
-    async roomBooking(request: any) {
+    async booking(request: any) {
         try {
 
             const hotelId = request.params.hotelId;
             const userData = request.user
-            const fromDate = new Date(request.body.fromDate)
-            const toDate = new Date(request.body.toDate)
+            const fromDate = new Date(request.body.FromDate)
+            const toDate = new Date(request.body.ToDate)
             const CurrentDate = new Date();
 
             request.body.userId = userData._id;
-            request.body.CheckInDate = fromDate;
-            request.body.CheckOutDate = toDate;
+            request.body.FromDate = fromDate;
+            request.body.ToDate = toDate;
             request.body.CurrentDate = CurrentDate;
             request.body.hotelId = hotelId;
 
             // console.log(toDate.getDate() - fromDate.getDate() + 1);
 
-            const hotelRoomsData = await ManagerSchemaRooms.findOne({ hotel_id: hotelId })
+            const hotelRoomsData = await HOTEL_ROOM.findOne({ hotel_id: hotelId })
             if (!hotelRoomsData) {
                 return 'hotel not found..'
             }
             let AcRoomPrice = Number(hotelRoomsData.ACRoomPrice) * Number(request.body.AcRooms);
             let NonAcRoomPrice = Number(hotelRoomsData.NonACRoomPrice) * Number(request.body.NonAcRooms);
             let roomsPrice = AcRoomPrice + NonAcRoomPrice;
+
             request.body.roomsPrice = roomsPrice;
-            const newUserData = new roomBookingSchema(request.body);
+            const newUserData = new BOOKING(request.body);
             newUserData.save()
             if (Number(hotelRoomsData.ACRooms) > 0 && Number(hotelRoomsData.NonACRooms) > 0) {
                 let availableAcRooms = Number(hotelRoomsData.ACRooms) - Number(request.body.AcRooms)
                 let availableNonAcRooms = Number(hotelRoomsData.NonACRooms) - Number(request.body.NonAcRooms)
-                await ManagerSchemaRooms.updateOne({ hotel_id: hotelId },
+                await HOTEL_ROOM.updateOne({ hotel_id: hotelId },
                     {
                         $set: {
                             ACRooms: availableAcRooms,
@@ -168,35 +172,15 @@ class UserService {
         }
     }
     async checkOut(request: any) {
-
         try {
-
-            const userRoomId = request.query.userRoomId
+            const roomId = request.params.roomId;
             const checkOutDate = new Date(request.body.checkOutDate);
+            await BOOKING.updateOne({ _id: roomId },
+                {
+                    $set: { checkOutDate: checkOutDate }
 
-            return new Promise(async (resolve: any, reject: any) => {
-
-                await roomBookingSchema.updateOne({ _id: userRoomId },
-                    {
-                        $set: { checkOutDate: checkOutDate }
-
-                    }).then(() => {
-                        resolve('checkout success')
-                    }).catch((err) => {
-                        reject('checkout fail')
-                    })
-            })
-            // await roomBookingSchema.updateOne({ _id: userRoomId },
-            //     {
-            //         $set: { checkOutDate: checkOutDate }
-
-            //     }).then(()=>{
-            //         return 'checkout success'
-            //     })
-            // console.log(data.n);
-            // if (!data.n) {
-            //     return 'booking room not found'
-            // }
+                })
+            return 'Checkout Success !';
         }
         catch (err) {
             throw err;

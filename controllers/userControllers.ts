@@ -1,37 +1,33 @@
 import { Request, Response } from "express";
 import userService from "../services/userService";
 import passport from "passport";
-import errorFunction  from "../utils/errorFunction";
+import errorFunction from "../utils/errorFunction";
 import ResponseStatus from "../constants/ResponseStatus";
-import {USERS} from '../models/userModel';
 import jwt from "jsonwebtoken";
+import TextResponse from "../constants/TextResponse";
 
 class UserController {
-   
 
     async create(request: Request, response: Response) {
         try {
-
-            const DATA : any = await userService.create(request);
-            if (typeof DATA==='string' ) {
-                response.status(409).json({ message: DATA })
-            }else {
-                console.log('user added successfully....');
-                response.json({ msg: 'USER CREATED SUCCESSFULLY !' })
-
+            const USER_DATA: any = await userService.create(request);
+            if (typeof USER_DATA === 'string') {
+                response.status(ResponseStatus.STATUS_INCORRECT_DATA).json({ message: USER_DATA })
+            } else {
+                console.log(TextResponse.USER_CREATED);
+                response.status(ResponseStatus.STATUS_SUCCESS).json({ MESSAGE: TextResponse.USER_CREATED })
             }
-        } catch (error:any) {
-            console.log("error in post user (userController.js) !");
-		    response.status(406).json(errorFunction(true, `Error : ${error.message}`,null));        
+        } catch (error: any) {
+            console.log(error, TextResponse.USER_CREATE_ERROR);
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.USER_CREATE_ERROR, null));
         }
     }
-
     async login(request: Request, response: Response, next: any) {
         try {
             let token: any;
-            await passport.authenticate('local', (error, user) => {
+            await passport.authenticate('local', (error: Error, user: any) => {
                 if (error) {
-                    response.status(406).json(errorFunction(true, `Error : ${error.message}`,null));                            
+                    response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
                 }
                 token = jwt.sign(
                     { user_id: user._id },
@@ -41,71 +37,65 @@ class UserController {
                     // }
                 );
 
-                if(typeof user==='string'){
-                response.json({ message: user })
-                }else{
-                response.append('Authorization', token);
-                response.json({ message: "LOGGED IN." })
-                console.log('user logged in.');
-                
+                if (typeof user === 'string') {
+                    response.status(ResponseStatus.STATUS_INCORRECT_DATA).json({ MESSAGE: user })
+                } else {
+                    response.append('Authorization', token);
+                    response.status(ResponseStatus.STATUS_SUCCESS).json({ MESSAGE: TextResponse.LOGIN })
+                    console.log(TextResponse.LOGIN);
                 }
             }
             )(request, response, next)
-        } catch (error:any) {
-            response.status(406).json(errorFunction(true, `Error : ${error.message}`,null));                            
+        } catch (error: any) {
+            console.log(error, TextResponse.LOGIN_ERROR);
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
         }
     }
-   
-   
-    async getUser(request: Request, response: Response, next: any) {
+    async getUser(request: Request, response: Response) {
         try {
             const USER_DATA = await userService.getUser(request);
-            if(typeof USER_DATA==='string'){
-                response.json({ message: USER_DATA })
-            }else{
-                response.json({DATA:USER_DATA});
+            if (typeof USER_DATA === 'string') {
+                response.status(ResponseStatus.STATUS_INCORRECT_DATA).json({ MESSAGE: USER_DATA })
+
+            } else {
+                response.status(ResponseStatus.STATUS_SUCCESS).json({ DATA: USER_DATA })
             }
         }
-         catch (error:any) {
-            console.log(error,"error in get user (userController.js) !");
-            response.status(406).json(errorFunction(true, `Something want wring !!! `,null));                            
-
+        catch (error: any) {
+            console.log(error, TextResponse.USER_GET_ERROR);
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
         }
     }
-   
     async getHotelDetails(request: Request, response: Response, next: any) {
         try {
             const HOTEL_DATA = await userService.getHotelDetails(request);
-            if(typeof HOTEL_DATA==='string'){
-                response.json({ message: HOTEL_DATA })
-            }else{
-            response.json({DATA:HOTEL_DATA});
+            if (typeof HOTEL_DATA === 'string') {
+                response.status(ResponseStatus.STATUS_INCORRECT_DATA).json({ MESSAGE: HOTEL_DATA })
+
+            } else {
+                response.status(ResponseStatus.STATUS_SUCCESS).json({ DATA: HOTEL_DATA })
             }
         }
-         catch (error:any) {
-            console.log("error in get hotel (userController.js) !");
-            response.status(406).json(errorFunction(true, `Something want wring !!! `,null));                            
-
+        catch (error: any) {
+            console.log(error, TextResponse.HOTEL_GET_ERROR);
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
         }
     }
-   
     async search(request: any, response: any) {
         try {
             const HOTEL_DATA = await userService.search(request);
-            if(HOTEL_DATA.length){
-            response.status(ResponseStatus.STATUS_SUCCESS).json({ DATA: HOTEL_DATA })
-            }else{
-            response.status(ResponseStatus.STATUS_NOT_FOUND).json({ message: "Hotel not found." })
+            if (HOTEL_DATA.length) {
+                response.status(ResponseStatus.STATUS_SUCCESS).json({ DATA: HOTEL_DATA })
+            } else {
+                response.status(ResponseStatus.STATUS_INCORRECT_DATA).json({ MESSAGE: TextResponse.HOTEL_NOT_FOUND })
             }
         } catch (error) {
-            console.log(error,"error in get hotel (userController.js) !");
-            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, `Something want wring !!! `,null));                            
+            console.log(error, TextResponse.SEARCH_HOTEL_ERROR);
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
         }
 
 
     }
-
-
     async update(request: any, response: any) {
         try {
             await userService.update(request, response)
@@ -117,58 +107,54 @@ class UserController {
     }
     async loginGoogle(request: any, response: any) {
         try {
-            passport.authenticate('google', (err, user) => {
+            passport.authenticate('google', (err: Error, user: any) => {
                 if (err) {
-                    throw err;
+                    response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
                 }
                 response.append('Authorization', user);
-                response.append('Aaaaaaaaaaaaaaaaaaaaaaaaaaaa', "demo");
-                console.log('aapend');
-                
-                response.json({ message: { user } })
+                response.status(ResponseStatus.STATUS_SUCCESS).json({ MESSAGE: user })
             })(request, response);
-        } catch (err) {
-            console.log(err);
-            response.json({ message: { err } })
+        } catch (error) {
+            console.log(error, TextResponse.GOOGLE_LOGIN_ERROR);
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
         }
     }
-    async roomBooking(request:any,response:any){
+    async booking(request: any, response: any) {
 
         try {
-            const DATA = await userService.roomBooking(request);
-            if(typeof  DATA==='string'){
-            response.json({ message: DATA })
-            }else{
-            response.json({ message: {'congrats ! your room book successfully!!! rooms price :': DATA.roomsPrice} })
+            const BOOKING_DATA = await userService.booking(request);
+            if (typeof BOOKING_DATA === 'string') {
+                response.status(ResponseStatus.STATUS_INCORRECT_DATA).json({ MESSAGE: BOOKING_DATA })
+
+            } else {
+                const ResponseMessage = TextResponse.BOOKING + BOOKING_DATA.roomsPrice;
+                response.status(ResponseStatus.STATUS_SUCCESS).json({ MESSAGE: ResponseMessage })
             }
         } catch (error) {
-            response.json({ message: { error } })
+            console.log(error, TextResponse.BOOKING_ERROR);
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
         }
     }
-    async checkOut(request:any,response:any){
+    async checkOut(request: any, response: any) {
         try {
-            const DATA:any=await userService.checkOut(request);
-            // DATA.catch((msg:any)=>{
-            //     console.log(msg);
-                
-            // })
-            response.json({ message: DATA })
+            const CHECK_OUT_DATA: any = await userService.checkOut(request);
+            response.status(ResponseStatus.STATUS_SUCCESS).json({ MESSAGE: CHECK_OUT_DATA })
+
         } catch (error) {
-            response.json({ message: "something wrong" })
-            
+            console.log(error, TextResponse.CHECKOUT_ERROR);
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
         }
     }
     async logout(request: any, response: any) {
         request.session.destroy((err: Error) => {
             if (!err) {
-                response.json({ msg: 'logout success.....' })
+                response.status(ResponseStatus.STATUS_SUCCESS).json({ MESSAGE: TextResponse.LOGOUT })
             } else {
-                response.json({ msg: err })
+                console.log(TextResponse.LOGIN_ERROR);
+                response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
             }
         })
     }
-  
-
 }
 
 let userController = new UserController();

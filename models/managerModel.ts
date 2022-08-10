@@ -1,13 +1,13 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
 
-export interface ManagerIMG extends Document {
+export interface Images extends Document {
   user_id: String,
   hotel_id:String,
   loboImg: Buffer
 }
-
-
-const MANAGER_SCHEMA_IMG = new Schema<ManagerIMG>({
+const HOTEL_IMAGES = new Schema<Images>({
+  //hotel image
+  
   user_id: {
     type: String,
     require: true,
@@ -31,7 +31,8 @@ const MANAGER_SCHEMA_IMG = new Schema<ManagerIMG>({
 
 }, { collection: 'hotel-images' });
 
-export interface ManagerHotel extends Document {
+export interface Hotel extends Document {
+  // hotel
   user_id: String,
   hotelName: String,
   location: String,
@@ -39,7 +40,8 @@ export interface ManagerHotel extends Document {
   // filePath:Buffer
 }
 
-const MANAGER_SCHEMA_HOTEL = new Schema<ManagerHotel>({
+const HOTELS = new Schema<Hotel>({
+  //hotel
   // filePath: {
   //   type: Buffer,
   //   require: true,
@@ -65,7 +67,8 @@ const MANAGER_SCHEMA_HOTEL = new Schema<ManagerHotel>({
   }
 }, { collection: 'hotel' });
 
-export interface ManagerRooms extends Document {
+export interface Rooms extends Document {
+  // Rooms
   user_id: String,
   hotel_id:ObjectId,
   TotalRooms: Number,
@@ -75,7 +78,8 @@ export interface ManagerRooms extends Document {
   NonACRoomPrice: Number
 }
 
-const MANAGER_SCHEMA_ROOMS = new Schema<ManagerRooms>({
+const HOTEL_ROOMS = new Schema<Rooms>({
+  // room
   user_id: {
     type: String,
     require: true,
@@ -106,34 +110,7 @@ const MANAGER_SCHEMA_ROOMS = new Schema<ManagerRooms>({
   }
 }, { collection: 'room' });
 
-// export interface myarr extends Document{
-
-//   fno:Number,
-//   sno:Number,
-//   tno:Number,
-
-// }
-
-// const Myarr = new Schema<myarr>({
-//   fno: {
-//     type: Number,
-//     required: true,      
-//   },
-//   sno: {
-//     type: Number,
-//     required: true,      
-//   },
-//   tno: {
-//     type: Number,
-//     required: true,      
-//   }
-// })
-
-// mongoose.model<User>('Myarr',Myarr)
-
-
-
-const ManagerSchemaHotel = mongoose.model<ManagerHotel>('ManagerSchemaHotel', MANAGER_SCHEMA_HOTEL);
-const ManagerSchemaRooms = mongoose.model<ManagerRooms>('ManagerSchemaRooms', MANAGER_SCHEMA_ROOMS);
-const ManagerSchemaIMG = mongoose.model<ManagerIMG>('ManagerSchemaIMG', MANAGER_SCHEMA_IMG);
-export { ManagerSchemaHotel, ManagerSchemaRooms,ManagerSchemaIMG };
+const HOTEL = mongoose.model<Hotel>('ManagerSchemaHotel', HOTELS);
+const HOTEL_ROOM = mongoose.model<Rooms>('ManagerSchemaRooms', HOTEL_ROOMS);
+const HOTEL_IMAGE = mongoose.model<Images>('ManagerSchemaIMG', HOTEL_IMAGES);
+export { HOTEL, HOTEL_ROOM,HOTEL_IMAGE };

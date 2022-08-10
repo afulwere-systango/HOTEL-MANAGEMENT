@@ -1,75 +1,77 @@
 import { string } from "joi";
 import mongoose,{Schema,Document, ObjectId } from "mongoose";
-import { ManagerSchemaHotel } from "./managerModel";
+import { HOTEL } from "./managerModel";
 
 
 
 export interface User extends Document {
-    firstName:String,
-    lastName:String,
-    userPhone:Number,
-    userEmail:String,
-    userPass:String,
-    provider:String,
-    googleID:String
+    FirstName:String,
+    LastName:String,
+    Phone:Number,
+    Email:String,
+    Password:String,
+    Provider:String,
+    GoogleID:String
 }
 const USER = new Schema<User>({
-    firstName: {
+    FirstName: {
       type: String,
       required: true,      
     },
-    lastName: {
+    LastName: {
         type: String,
         required: true,      
       },
-    userPhone: {
+    Phone: {
         type:Number,
       },
-    userEmail: {
+    Email: {
         type: String,
         required: true,      
       },
-    userPass: {
+    Password: {
         type: String,
       },
-      provider: {
+    Provider: {
         type: String,
         required: true,      
       },
-      googleID: {
+    GoogleID: {
         type: String,
       }
 },{ collection: 'User' });
 
 
-export interface RoomBook extends Document {
+export interface Booking extends Document {
+  //Bookings
   userId:String,
   hotelId:ObjectId
-  adults:Number,
-  child:Number,
+  Adults:Number,
+  Child:Number,
   AcRooms:Number,
   NonAcRooms:Number,
-  fromDate:Date,
-  toDate:Date,
+  FromDate:Date,
+  ToDate:Date,
   CurrentDate:Date,
   roomsPrice:Number,
   // checkOutDate:Date
 }
 
-const ROOM_BOOK_SCHEMA = new Schema<RoomBook>({
+const ROOM_BOOKING= new Schema<Booking>({
   userId: {
     type: String,
     required: true,      
   },
+
   hotelId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,      
   },
-  adults: {
+  Adults: {
     type: Number,
     required: true,      
   },
-  child: {
+  Child: {
     type: Number,
     required: true,      
     
@@ -77,23 +79,23 @@ const ROOM_BOOK_SCHEMA = new Schema<RoomBook>({
   AcRooms: {
     type: Number,
     default:0,      
-    required: true
+    // required: true
   },
   NonAcRooms: {
     type: Number,
     default:0,
-    required: true      
+    // required: true      
   },
   roomsPrice: {
     type: Number,
     default:0,
     required: true      
   },
-  fromDate: {
+  FromDate: {
     type: Date,
     required: true,      
   },
-  toDate: {
+  ToDate: {
     type: Date,
     required: true,      
   },
@@ -110,6 +112,6 @@ const ROOM_BOOK_SCHEMA = new Schema<RoomBook>({
 
 
 const USERS = mongoose.model<User>('User',USER);
-const roomBookingSchema = mongoose.model<RoomBook>('RoomBook',ROOM_BOOK_SCHEMA);
+const BOOKING = mongoose.model<Booking>('RoomBook',ROOM_BOOKING);
 
-export {USERS,roomBookingSchema};
+export {USERS,BOOKING};
