@@ -17,15 +17,15 @@ passport.deserializeUser((user: any, done: any) => {
     done(null, user);
 });
 const validatePassword = (password: any, user: any) => {
-    return bcrypt.compareSync(password, user.userPass);
+    return bcrypt.compareSync(password, user.Password);
 }
 function passportInitialize(passport: any) {
     const localStrategy = passportLocal.Strategy
     passport.use('local', new localStrategy({
-        usernameField: 'userEmail',
-        passwordField: 'userPass',
+        usernameField: 'Email',
+        passwordField: 'Password',
     }, async (email: any, password: any, done: any) => {
-       await USERS.findOne({ userEmail: email })
+       await USERS.findOne({ Email: email })
             .then((user) => {
                 if (!user) {
                     return done(null, 'Incorrect email.');

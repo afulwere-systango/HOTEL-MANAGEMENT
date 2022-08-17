@@ -37,8 +37,11 @@ const googleVerifyUser = async (req: any, res: any, next: any) => {
 
 const verifyUser = async (req: any, res: any, next: any) => {
   const bearerData = req.headers['authorization'];
+  // console.log(req.headers);
+  // console.log(bearerData);
+  
   if (!bearerData) {
-    return res.status(403).json({ msg: "you are not login please login first..." });
+    return res.status(403).json({ msg: "you are not login please login first!!!" });
   }
   const bearer = bearerData.split(' ');
   const localToken = bearer[1]
@@ -49,7 +52,7 @@ const verifyUser = async (req: any, res: any, next: any) => {
   try {
 
     const decodedToken: any = jwt.verify(localToken, `${process.env.TOKEN_KEY}`);
-
+    
     const userData = await USERS.findOne({ _id: decodedToken.user_id })
     if (!userData) {
       return res.status(403).json({ msg: "user not available." });

@@ -12,14 +12,14 @@ class UserController {
         try {
             const USER_DATA: any = await userService.create(request);
             if (typeof USER_DATA === 'string') {
-                response.status(ResponseStatus.STATUS_INCORRECT_DATA).json({ message: USER_DATA })
+                response.status(ResponseStatus.STATUS_INCORRECT_DATA).json({ MESSAGE: USER_DATA })
             } else {
                 console.log(TextResponse.USER_CREATED);
                 response.status(ResponseStatus.STATUS_SUCCESS).json({ MESSAGE: TextResponse.USER_CREATED })
             }
         } catch (error: any) {
             console.log(error, TextResponse.USER_CREATE_ERROR);
-            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.USER_CREATE_ERROR, null));
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction());
         }
     }
     async login(request: Request, response: Response, next: any) {
@@ -27,7 +27,7 @@ class UserController {
             let token: any;
             await passport.authenticate('local', (error: Error, user: any) => {
                 if (error) {
-                    response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
+                    response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction());
                 }
                 token = jwt.sign(
                     { user_id: user._id },
@@ -40,6 +40,7 @@ class UserController {
                 if (typeof user === 'string') {
                     response.status(ResponseStatus.STATUS_INCORRECT_DATA).json({ MESSAGE: user })
                 } else {
+                    
                     response.append('Authorization', token);
                     response.status(ResponseStatus.STATUS_SUCCESS).json({ MESSAGE: TextResponse.LOGIN })
                     console.log(TextResponse.LOGIN);
@@ -48,7 +49,7 @@ class UserController {
             )(request, response, next)
         } catch (error: any) {
             console.log(error, TextResponse.LOGIN_ERROR);
-            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction());
         }
     }
     async getUser(request: Request, response: Response) {
@@ -63,7 +64,7 @@ class UserController {
         }
         catch (error: any) {
             console.log(error, TextResponse.USER_GET_ERROR);
-            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction());
         }
     }
     async getHotelDetails(request: Request, response: Response, next: any) {
@@ -78,9 +79,10 @@ class UserController {
         }
         catch (error: any) {
             console.log(error, TextResponse.HOTEL_GET_ERROR);
-            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction());
         }
     }
+    
     async search(request: any, response: any) {
         try {
             const HOTEL_DATA = await userService.search(request);
@@ -91,7 +93,7 @@ class UserController {
             }
         } catch (error) {
             console.log(error, TextResponse.SEARCH_HOTEL_ERROR);
-            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction());
         }
 
 
@@ -109,14 +111,14 @@ class UserController {
         try {
             passport.authenticate('google', (err: Error, user: any) => {
                 if (err) {
-                    response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
+                    response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction());
                 }
                 response.append('Authorization', user);
                 response.status(ResponseStatus.STATUS_SUCCESS).json({ MESSAGE: user })
             })(request, response);
         } catch (error) {
             console.log(error, TextResponse.GOOGLE_LOGIN_ERROR);
-            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction());
         }
     }
     async booking(request: any, response: any) {
@@ -132,7 +134,7 @@ class UserController {
             }
         } catch (error) {
             console.log(error, TextResponse.BOOKING_ERROR);
-            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction());
         }
     }
     async checkOut(request: any, response: any) {
@@ -142,16 +144,41 @@ class UserController {
 
         } catch (error) {
             console.log(error, TextResponse.CHECKOUT_ERROR);
-            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction());
         }
     }
+    
+    async rating(request: any, response: any) {
+        try {
+            const RATING_DATA: any = await userService.rating(request);
+            if (typeof RATING_DATA === 'string') {
+                response.status(ResponseStatus.STATUS_INCORRECT_DATA).json({ MESSAGE: RATING_DATA })
+
+            } else {
+                response.status(ResponseStatus.STATUS_SUCCESS).json({ MESSAGE: TextResponse.RATING_INSERTED })
+            }
+
+        } catch (error) {
+            
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction());
+        }
+    }
+    async review(request: any, response: any) {
+        try {
+            const REVIEW_DATA: any = await userService.review(request);
+                response.status(ResponseStatus.STATUS_SUCCESS).json({ MESSAGE: REVIEW_DATA })
+        } catch (error) {
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction());
+        }
+    }
+
     async logout(request: any, response: any) {
         request.session.destroy((err: Error) => {
             if (!err) {
                 response.status(ResponseStatus.STATUS_SUCCESS).json({ MESSAGE: TextResponse.LOGOUT })
             } else {
                 console.log(TextResponse.LOGIN_ERROR);
-                response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
+                response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction());
             }
         })
     }

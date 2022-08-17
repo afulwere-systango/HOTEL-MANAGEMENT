@@ -15,19 +15,19 @@ class Validation {
 		};
 		const { error } = validateData.userCreateValidations.validate(userCreateData);
 		if (error) {
-			return response.status(406).json(errorFunction(true, `Error in User Create Data : ${error.message}`, null));
+			return response.status(406).json(errorFunction());
 		} else {
 			next();
 		}
 	};
 	userLoginValidation = async (request: Request, response: Response, next: any) => {
 		const userLoginData = {
-			userEmail: request.body.userEmail,
-			userPass: request.body.userPass,
+			Email: request.body.Email,
+			Password: request.body.Password,
 		};
 		const { error } = validateData.userLoginValidations.validate(userLoginData);
 		if (error) {
-			return response.status(406).json(errorFunction(true, `Error in User Login Data : ${error.message}`, null));
+			return response.status(406).json(errorFunction());
 		} else {
 			next();
 		}
@@ -41,7 +41,7 @@ class Validation {
 		};
 		const { error } = validateData.hotelCreateValidations.validate(hotelCreateData);
 		if (error) {
-			return response.status(406).json(errorFunction(true, `Error in Hotel Create Data : ${error.message}`, null));
+			return response.status(406).json(errorFunction());
 		} else {
 			next();
 		}
@@ -57,7 +57,7 @@ class Validation {
 		};
 		const { error } = validateData.roomCreateValidations.validate(roomCreateData);
 		if (error) {
-			return response.status(406).json(errorFunction(true, `Error in Room Create Data : ${error.message}`, null));
+			return response.status(406).json(errorFunction());
 		} else {
 			next();
 		}
@@ -74,7 +74,7 @@ class Validation {
 		};
 		const { error } = validateData.bookingValidations.validate(bookingData);
 		if (error) {
-			return response.status(406).json(errorFunction(true, `Error in Room Create Data : ${error.message}`, null));
+			return response.status(406).json(errorFunction());
 		} else {
 			next();
 		}
@@ -85,7 +85,7 @@ class Validation {
 		};
 		const { error } = validateData.checkoutValidation.validate(checkoutData);
 		if (error) {
-			return response.status(406).json(errorFunction(true, `Error in checkout Data : ${error.message}`, null));
+			return response.status(406).json(errorFunction());
 		} else {
 			next();
 		}

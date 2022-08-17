@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { USERS, BOOKING } from '../models/userModel';
+import { USERS, BOOKING, RATING } from '../models/userModel';
 import { HOTEL, HOTEL_ROOM, HOTEL_IMAGE } from '../models/managerModel';
 import bcrypt from "bcrypt";
 import TextResponse from "../constants/TextResponse";
@@ -11,7 +11,7 @@ class UserService {
 
             request.body.Provider = 'local'
             const newUser = new USERS(request.body);
-            const newPassword:any= request.body.Password;
+            const newPassword: any = request.body.Password;
             const userExist = await USERS.findOne({ Email: newUser.Email });
             if (userExist) {
                 return TextResponse.USER_ALREADY_EXIST;
@@ -22,19 +22,20 @@ class UserService {
             return newUser;
         }
         catch (err) {
-            console.log(err, '(userService.ts)');
             throw err;
-
         }
     }
     async search(request: any) {
         try {
             const paramLocation = request.query.location;
             const paramRating = +request.query.rating;
+            console.log(paramRating);
+            
             return HOTEL.aggregate([
+                
                 {
                     $match: {
-                        $text: { $search: paramLocation || "indore", $diacriticSensitive: true }, rating: paramRating || { $lte: 5 }
+                        $text: { $search: paramLocation || "indore", $diacriticSensitive: true }, rating: {$lte: paramRating} || { $lte: 5 }
                     }
                 },
                 {
@@ -63,8 +64,8 @@ class UserService {
     async getUser(request: Request) {
         try {
             let userData: any = request.user;
-            return userData;
             console.log('user details successfully get.');
+            return userData;
         } catch (err) {
             throw err
         }
@@ -74,39 +75,33 @@ class UserService {
             const hotelId = request.params.hotelId;
 
             const hotelData: any = await HOTEL.findOne({ _id: hotelId })
+            if(!hotelData){
+                return "Hotel Not Found.    "
+            }
+            const ratings:any=await RATING.aggregate(
+                        [   
+                    
+                    {
+                        $match:{"hotelId":hotelId}
+                    },
+                    {
+                        
+                        $group:{
+                            _id: "$hotelId",
+                            avgCleanliness: { $avg: "$Cleanliness"},
+                            avgStaff: { $avg: "$Staff"},
+                            avgComfort: { $avg: "$Comfort"},
+                            avgFacilities: { $avg: "$Facilities"},
+                            avgFree_WiFi: { $avg: "$Free_WiFi"},                           
+                            reviewMessages:{$push:"$reviewMessages"}
+                        }
+                    }
+                        ]
+                )
             const roomData: any = await HOTEL_ROOM.findOne({ hotel_id: hotelId })
             const imageData: any = await HOTEL_IMAGE.findOne({ hotel_id: hotelId })
-            // console.log(imageData);
-
-            const ALL_DATA: any = { hotelData, roomData, imageData };
-            // const { hotelName, location, rating }:any = hotelData;
-            // const { TotalRooms, ACRooms, NonACRooms, ACRoomPrice, NonACRoomPrice } = roomData;
-            // const  {loboImg,Images} :any  = imageData;
-            // console.log(loboImg,Images);
-
-            // DATA = {
-            //     "hotel name ": hotelName,
-            //     "location": location,
-            //     "Rating": rating,
-            //     "Total Rooms": TotalRooms,
-            //     "AC Rooms": ACRooms,
-            //     "Non AC Rooms": NonACRooms,
-            //     "AC Room Price": ACRoomPrice,
-            //     "Non Ac Room Price": NonACRoomPrice,
-            //     "lobo image":loboImg
-            //     // loboImg, Images
-            // }
-
+            const ALL_DATA: any = { hotelData, ratings,roomData,imageData };
             return ALL_DATA;
-
-
-            // // console.log(hotelData);
-            // // console.log(roomData);
-            // // console.log(imageData);
-            // const data :any=[...hotelData];
-
-
-
         } catch (err) {
             throw err
         }
@@ -166,26 +161,104 @@ class UserService {
                 )
                 return newUserData;
             }
-            return 'rooms are not available right now...'
+            return 'Rooms are not available right now...'
         } catch (error) {
             throw error;
         }
     }
     async checkOut(request: any) {
         try {
-            const roomId = request.params.roomId;
+            const bookingRoomId = request.params.roomId;
+            let bookingData: any = await BOOKING.findOne({ _id: bookingRoomId })
+            const hotelRoomsData: any = await HOTEL_ROOM.findOne({ hotel_id: bookingData.hotelId })
+
             const checkOutDate = new Date(request.body.checkOutDate);
-            await BOOKING.updateOne({ _id: roomId },
+            const toDate = bookingData.ToDate.getDate();
+
+            if (bookingData.checkOutDate) {
+                return `Already Checked Out! Rooms Price : ${bookingData.roomsPrice} `
+            }
+
+            if (checkOutDate.getDate() > toDate) {
+                const extraDay = checkOutDate.getDate() - toDate;
+                const AcRoomPrice: any = Number(hotelRoomsData.ACRoomPrice) * Number(bookingData.AcRooms) * (extraDay);
+                const NonAcRoomPrice: any = Number(hotelRoomsData.NonACRoomPrice) * Number(bookingData.NonAcRooms) * (extraDay);
+                const extraRoomPrice = AcRoomPrice + NonAcRoomPrice;
+                console.log(extraRoomPrice);
+                console.log(bookingData.roomsPrice);
+                await BOOKING.updateOne({ _id: bookingRoomId },
+                    {
+                        $set: { roomsPrice: extraRoomPrice + bookingData.roomsPrice }
+
+                    })
+
+
+            }
+            await HOTEL_ROOM.updateOne({ hotel_id: bookingData.hotelId },
+                {
+                    $set: { ACRooms: hotelRoomsData.ACRooms + bookingData.AcRooms, NonACRooms: hotelRoomsData.NonACRooms + bookingData.NonAcRooms }
+                })
+            bookingData = await BOOKING.findOne({ _id: bookingRoomId });
+            await BOOKING.updateOne({ _id: bookingRoomId },
                 {
                     $set: { checkOutDate: checkOutDate }
 
                 })
-            return 'Checkout Success !';
+            return `Checkout Success ! Rooms Price : ${bookingData.roomsPrice}`;
         }
         catch (err) {
             throw err;
         }
     }
+    async rating(request: any) {
+        const hotelId = request.params.hotelId;
+        const userData = request.user;
+        const cleanliness = request.body.Cleanliness;
+        const staff = request.body.Staff;
+        const comfort = request.body.Comfort;
+        const facilities = request.body.Facilities;
+        const freeWiFi = request.body.Free_WiFi;
+        const rating = Math.round((cleanliness + staff + comfort + facilities + freeWiFi) / 5);
+
+        request.body.hotelId = hotelId;
+        request.body.userId = userData._id;
+        request.body.rating = rating;
+        
+        const user= await RATING.findOne({hotelId: hotelId,userId:userData._id})
+        if(user){
+            return `Rating already given by you. Rating :${user.rating}`
+        }                
+        const ratingData = new RATING(request.body);
+        await ratingData.save();
+        const allRatings = await RATING.find({ hotelId: hotelId }, { rating: 1, _id: 0 })
+        let totalRating:any=0;
+        allRatings.map(({ rating }) => totalRating += rating)
+        const averageRating = totalRating / allRatings.length
+        await HOTEL.updateOne({ _id: hotelId },
+            {
+                $set: { rating: averageRating }
+            })
+        return ratingData;
+
+    }
+    async review(request:any){
+        const hotelId = request.params.hotelId;
+        const userData = request.user;
+        const message = request.body.message;
+        const ratingData=await RATING.findOne({ hotelId: hotelId,userId:userData._id });
+        if(!ratingData){
+                return "Hotel not found !"
+            }
+            await RATING.updateOne({ hotelId: hotelId,userId:userData._id },
+            {
+                $push: {
+                    reviewMessages:  message 
+                }
+            }
+        )
+        return "Review Added successfully !";
+    }
+
 }
 
 let userService = new UserService();

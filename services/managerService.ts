@@ -15,6 +15,9 @@ class ManagerService {
             // fs.createWriteStream('./text.jpeg').write(img);
             const userData: any = request.user;
             request.body.user_id = userData._id;
+            if(userData.Role!="manager"){
+                return "unauthorized !!!"
+            }
             let hotelData = new HOTEL(request.body);
             await hotelData.save();
             return hotelData;
@@ -28,6 +31,9 @@ class ManagerService {
             const hotelId = request.params.id;
             const userData: any = request.user;
             request.body.user_id = userData._id;
+            if(userData.Role!="manager"){
+                return "unauthorized !!!"
+            }
             const hotelData: any = await HOTEL.findOne({ _id: hotelId });
             if (!hotelData) {
                 return 'hotel data not found'
@@ -69,7 +75,9 @@ class ManagerService {
             const hotelId = request.params.id;
             const img: any = request.files;
             const userData = request.user;
-
+            if(userData.Role!="manager"){
+                return "unauthorized !!!"
+            }
             request.body.user_id = userData._id;
             const hotelData: any = await HOTEL.findOne({ _id: hotelId });
             if (!hotelData) {
@@ -95,16 +103,12 @@ class ManagerService {
     async uploadImages(request: any) {
 
         const hotel_id = request.params.id;
-
-
         const img: any = request.files;
-        const bearerData = request.headers['authorization'];
-        const bearer = bearerData.split(' ');
-        const token = bearer[1]
-        const decoded: any = jwt.verify(token, `${process.env.TOKEN_KEY}`);
-        const userID = decoded.user_id;
-        request.body.user_id = userID;
-
+        const userData = request.user;
+        request.body.user_id = userData._id;
+        if(userData.Role!="manager"){
+            return "unauthorized !!!"
+        }
         const hotelData: any = await HOTEL.findOne({ _id: hotel_id });
         if (hotelData) {
 

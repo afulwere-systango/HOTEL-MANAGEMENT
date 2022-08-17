@@ -8,6 +8,9 @@ import session from "express-session";
 import passport from 'passport';
 import passportInitialize from './config/passport';
 import multer from 'multer';
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from "./swagger.json";
+
 
 
 const multerVar=multer();
@@ -46,7 +49,7 @@ connect(`${process.env.DB_URL}`);
 app.use('/user', userRout);
 app.use('/manager', managerRout);
 
-
+app.use('/api-docs', swaggerUi.serve,swaggerUi.setup(swaggerDocument));
 app.listen(PORT, () => {
     console.log(`server listen at port ${PORT}`);
 })

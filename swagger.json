@@ -1,0 +1,98 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "HOTEL SERVICE API",
+    "description": "Hotel Service provides some API's that are use for performed some operations of user and service provider.",
+    "version": "0.1.9"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "USER",
+      "description": "all user related API's here"
+    },
+    {
+      "name": "MANAGER",
+      "description": "all manager related API's here"
+    }
+  ],
+  "paths": {
+    "/user/create": {
+      "get": {
+        "summary": "user Registration.",
+        "tags": [
+          "USER"
+        ]
+      }
+    },
+    "/user/get-user-details": {
+      "get": {
+        "summary": "Returns currently login user data.",
+        "tags": [
+          "USER"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "string"
+                    },
+                    "FirstName": {
+                      "type": "string"
+                    },
+                    "LastName": {
+                      "type": "string"
+                    },
+                    "Phone": {
+                      "type": "integer"
+                    },
+                    "Email": {
+                      "type": "string"
+                    },
+                    "Password": {
+                      "type": "string"
+                    },
+                    "Role": {
+                      "type": "string"
+                    },
+                    "Provider": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Incorrect data found."
+          },
+          "500": {
+            "description": "Bad request. Server Error."
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,35 +1,5 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
 
-export interface Images extends Document {
-  user_id: String,
-  hotel_id:String,
-  loboImg: Buffer
-}
-const HOTEL_IMAGES = new Schema<Images>({
-  //hotel image
-  
-  user_id: {
-    type: String,
-    require: true,
-  },
-  hotel_id: {
-    type: String,
-    require: true,
-  },
-  loboImg: {
-    type: Buffer,
-    // require: true,
-  },
-  Images: {
-      type: [
-        { type:Buffer
-          //  mongoose.Schema.Types.ObjectId, ref: 'hotel'
-        // , required: true 
-      },
-      ],
-      }
-
-}, { collection: 'hotel-images' });
 
 export interface Hotel extends Document {
   // hotel
@@ -109,6 +79,39 @@ const HOTEL_ROOMS = new Schema<Rooms>({
     required: true,
   }
 }, { collection: 'room' });
+
+
+export interface Images extends Document {
+  user_id: String,
+  hotel_id:String,
+  loboImg: Buffer
+}
+const HOTEL_IMAGES = new Schema<Images>({
+  //hotel image
+  
+  user_id: {
+    type: String,
+    require: true,
+  },
+  hotel_id: {
+    type: String,
+    require: true,
+  },
+  loboImg: {
+    type: Buffer,
+    // require: true,
+  },
+  Images: {
+      type: [
+        { type:Buffer
+          //  mongoose.Schema.Types.ObjectId, ref: 'hotel'
+        // , required: true 
+      },
+      ],
+      }
+
+}, { collection: 'hotel-images' });
+
 
 const HOTEL = mongoose.model<Hotel>('ManagerSchemaHotel', HOTELS);
 const HOTEL_ROOM = mongoose.model<Rooms>('ManagerSchemaRooms', HOTEL_ROOMS);

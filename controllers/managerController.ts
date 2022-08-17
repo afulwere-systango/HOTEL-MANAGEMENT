@@ -2,19 +2,24 @@ import { Request, response, Response } from "express";
 import managerService from "../services/managerService";
 import errorFunction from "../utils/errorFunction";
 import passport from "passport";
+import ResponseStatus from "../constants/ResponseStatus";
+import TextResponse from "../constants/TextResponse";
 
 class ManagerController {
 
     async createHotel(request: Request, response: Response, next: any) {
         try {
-            await managerService.createHotel(request, next);
-            console.log('hotel created successfully.');
-            response.json({ msg: 'hotel created successfully.' })
-        } catch (error:any) {
-            console.log('error in managerController.ts');
-            response.json(
-                errorFunction(true, `Error in hotel Data : ${error.message}`, null)
-            );
+
+            const HOTEL_DATA = await managerService.createHotel(request, next);
+            if (typeof HOTEL_DATA === "string") {
+                response.status(ResponseStatus.STATUS_INCORRECT_DATA).json({ MESSAGE: HOTEL_DATA })
+            } else {
+                console.log(TextResponse.HOTEL_CREATED);
+                response.status(ResponseStatus.STATUS_SUCCESS).json({ DATA: TextResponse.HOTEL_CREATED })
+            }
+        } catch (error: any) {
+            console.log(error, TextResponse.HOTEL_CREATE_ERROR);
+            response.status(ResponseStatus.STATUS_SUCCESS).json({ MESSAGE: TextResponse.SOMETHING_WENT_WRONG })
         }
 
     }
@@ -30,54 +35,48 @@ class ManagerController {
     async createRooms(request: Request, response: Response, next: any) {
 
         try {
-            const DATA: any = await managerService.createRooms(request, next);
-            if (typeof DATA==='string') {
-              response.json({ msg: DATA })
-            }else{
-            response.json({ msg: 'room inserted successfully...' })
+            const ROOMS_DATA: any = await managerService.createRooms(request, next);
+            if (typeof ROOMS_DATA === 'string') {
+                response.status(ResponseStatus.STATUS_INCORRECT_DATA).json({ MESSAGE: ROOMS_DATA })
+            } else {
+                console.log(TextResponse.ROOMS_INSERTED);
+                response.status(ResponseStatus.STATUS_SUCCESS).json({ DATA: TextResponse.ROOMS_INSERTED })
             }
         } catch (error: any) {
-            // console.log(error,'line 35');
-            console.log('error in managerController.ts');
-            // response.json({msg:{error}});
-            response.json(
-                errorFunction(true, `Error in Rooms Data : ${error.message}`, null)
-            );
+            console.log(error, TextResponse.ROOMS_INSERTED_ERROR);
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction());
         }
-
     }
+
     async uploadLogoImage(request: Request, response: Response) {
         try {
-            const DATA = await managerService.uploadLogoImage(request);
-            if (typeof DATA==='string') {
-                response.json({ msg:  DATA})
+            const LOBO_IMAGE_DATA = await managerService.uploadLogoImage(request);
+            if (typeof LOBO_IMAGE_DATA === 'string') {
+                response.status(ResponseStatus.STATUS_INCORRECT_DATA).json({ MESSAGE: LOBO_IMAGE_DATA })
             } else {
-                response.json({ msg: 'images added successfully....' })
+                console.log(TextResponse.LOGO_IMAGE_UPLOADED);
+                response.status(ResponseStatus.STATUS_SUCCESS).json({ DATA: TextResponse.LOGO_IMAGE_UPLOADED })
             }
         } catch (error: any) {
-            response.json(
-                errorFunction(true, `Error in images Data : ${error.message}`, null)
-            );
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction());
         }
 
     }
-    
-    
+
+
     async uploadImages(request: Request, response: Response) {
-
         try {
-            console.log(2222);
-            
-            const DATA = await managerService.uploadImages(request);
-            // console.log(DATA);
-            
-                response.json({ msg: DATA })
-            
+
+            const IMAGE_DATA = await managerService.uploadImages(request);
+            if (typeof IMAGE_DATA === 'string') {
+                response.status(ResponseStatus.STATUS_INCORRECT_DATA).json({ MESSAGE: IMAGE_DATA })
+            }
+            else {
+                console.log(TextResponse.IMAGE_UPLOADED);
+                response.status(ResponseStatus.STATUS_SUCCESS).json({ DATA: TextResponse.IMAGE_UPLOADED })
+            }
         } catch (error: any) {
-            
-            response.json(
-                errorFunction(true, `Error in images Data : ${error.message}`, null)
-            );
+            response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction());
         }
 
     }
@@ -85,19 +84,17 @@ class ManagerController {
 
 
 
-    async googleLogin(request:any){
-        await passport.authenticate('google', (err:any, user:any) => {
-            if (err) {
-                throw err;
-            }
-            console.log(user);
-            }
-            )(request,response);
-            // response.append('Authorization',token); 
-            // response.json({ message: { user, access_token: token } })
-
-
-    }
+    //     async googleLogin(request:any){
+    //         await passport.authenticate('google', (err:any, user:any) => {
+    //             if (err) {
+    //             response.status(ResponseStatus.STATUS_SERVER_ERROR).json(errorFunction(true, TextResponse.SOMETHING_WENT_WRONG, null));
+    //             }
+    //             console.log(user);
+    //             }
+    //             )(request,response);
+    //             // response.append('Authorization',token); 
+    //             // response.json({ message: { user, access_token: token } })
+    //     }
 }
 
 let managerController = new ManagerController();

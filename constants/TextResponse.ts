@@ -1,6 +1,14 @@
 class TextResponse{
     static USER_CREATED = "USER CREATED SUCCESSFULLY !";
+    static HOTEL_CREATED = "HOTEL CREATED SUCCESSFULLY !";
+    static ROOMS_INSERTED = "ROOMS INSERTED SUCCESSFULLY!";
+    static LOGO_IMAGE_UPLOADED = "LOGO IMAGES UPLOADED SUCCESSFULLY!";
+    static IMAGE_UPLOADED = "IMAGES UPLOADED SUCCESSFULLY!";
+    static RATING_INSERTED = "RATING INSERTED SUCCESS!";
+    static RATING_INSERTED_ERROR = "error in rating inserted.";
+    static ROOMS_INSERTED_ERROR = "ROOMS INSERTED SUCCESSFULLY!";
     static USER_CREATE_ERROR="error in create user.";
+    static HOTEL_CREATE_ERROR="hotel in create user.";
     static LOGIN_ERROR="error in login.";
     static USER_GET_ERROR="error in get user.";
     static HOTEL_GET_ERROR="error in get hotel.";

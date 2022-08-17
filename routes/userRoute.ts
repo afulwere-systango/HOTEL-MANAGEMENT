@@ -14,13 +14,17 @@ route.post('/login',validation.userLoginValidation,userController.login);
 route.get('/auth/google', passport.authenticate("google", { scope: ["email", "profile"] }));
 route.get('/auth/google/callback',userController.loginGoogle);
 //get details of specific user 
-route.get('/get-user-details',googleVerifyUser,userController.getUser);
+route.get('/get-user-details',verifyUser,userController.getUser);
 //get hotel details by hotel id     
 route.get('/get-hotel-details/:hotelId',verifyUser,userController.getHotelDetails);    
 //searching  hotels [optional location and rating] without login  
 route.get('/search',userController.search);
 //booking hotel hotel id
 route.post('/booking-room/:hotelId',validation.bookingValidation,verifyUser,userController.booking);
+//rating of specific  hotel by hotel id
+route.post('/rating/:hotelId',verifyUser,userController.rating);
+//review of specific  hotel by hotel id
+route.post('/review/:hotelId',verifyUser,userController.review);
 //checkout hotel 
 route.post('/check-out/:roomId',validation.checkoutValidation,verifyUser,userController.checkOut);
 

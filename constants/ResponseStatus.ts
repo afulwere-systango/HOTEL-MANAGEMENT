@@ -7,3 +7,4 @@ class ResponseStatus{
 	static STATUS_SERVER_ERROR = 500;
 }
 export default ResponseStatus;
+

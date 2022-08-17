@@ -13,8 +13,8 @@ class ValidateData {
     });
 
     userLoginValidations = joi.object({
-        userEmail: joi.string().email().trim(true).required(),
-        userPass: joi.string().min(4).trim(true).required()
+        Email: joi.string().email().trim(true).required(),
+        Password: joi.string().min(4).trim(true).required()
     });
 
     hotelCreateValidations = joi.object({

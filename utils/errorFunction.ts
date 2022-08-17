@@ -1,5 +1,5 @@
-const errorFunction = (errorBit:any, msg:any, data:any) => {
-    if (errorBit) return { is_error: errorBit, message: msg };
-    else return { is_error: errorBit, message: msg, data };
+import TextResponse from "../constants/TextResponse";
+const errorFunction = () => {
+     return { is_error: true, message: TextResponse.SOMETHING_WENT_WRONG };
 };
 export default errorFunction;

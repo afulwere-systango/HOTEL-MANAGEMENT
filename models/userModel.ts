@@ -4,12 +4,62 @@ import { HOTEL } from "./managerModel";
 
 
 
+export interface Rating extends Document {
+  userId:String,
+  hotelId:String
+  Cleanliness:Number,
+  Staff:Number,
+  Comfort:Number,
+  Facilities:Number,
+  Free_WiFi:Number,
+  rating:Number,
+  reviewMessages:String
+}
+
+const RATINGS = new Schema<Rating>({
+    userId: {
+    type: String,
+    required: true,      
+    },
+    hotelId: {
+      type: String,
+      required: true,      
+    },
+    Cleanliness: {
+      type:Number,
+    },
+    Staff: {
+      type: Number,
+    },
+    Comfort: {
+      type: Number,
+    },
+    Facilities: {
+      type: Number,
+    },
+    Free_WiFi: {
+      type: Number,
+    },
+    rating: {
+      type: Number,
+    },
+    reviewMessages: {
+      type:[
+      {
+        type: String,
+      },],
+    }
+},{ collection: 'rating' });
+
+
+
 export interface User extends Document {
     FirstName:String,
     LastName:String,
     Phone:Number,
     Email:String,
     Password:String,
+    Role:String,
     Provider:String,
     GoogleID:String
 }
@@ -30,6 +80,9 @@ const USER = new Schema<User>({
         required: true,      
       },
     Password: {
+        type: String,
+      },
+    Role: {
         type: String,
       },
     Provider: {
@@ -113,5 +166,6 @@ const ROOM_BOOKING= new Schema<Booking>({
 
 const USERS = mongoose.model<User>('User',USER);
 const BOOKING = mongoose.model<Booking>('RoomBook',ROOM_BOOKING);
+const RATING = mongoose.model<Rating>('Rating',RATINGS);
 
-export {USERS,BOOKING};
+export {USERS,BOOKING,RATING};
